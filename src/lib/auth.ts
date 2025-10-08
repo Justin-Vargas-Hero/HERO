@@ -2,12 +2,6 @@ import { type NextAuthOptions, SessionStrategy } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
 import { compare } from "bcryptjs";
-import { checkEnvVars } from "@/lib/env-check";
-
-// Check environment variables on load
-if (typeof window === 'undefined') {
-    checkEnvVars();
-}
 
 const prisma = new PrismaClient();
 

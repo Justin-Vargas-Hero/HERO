@@ -1,10 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    output: 'standalone',
     eslint: {
-        // Warning: This allows production builds to successfully complete even if
-        // your project has ESLint errors.
         ignoreDuringBuilds: true,
     },
     async headers() {
@@ -14,8 +11,7 @@ const nextConfig: NextConfig = {
                 headers: [
                     {
                         key: "Content-Security-Policy",
-                        value:
-                            "frame-src 'self' https://challenges.cloudflare.com https://*.challenges.cloudflare.com;",
+                        value: "frame-src 'self' https://challenges.cloudflare.com https://*.challenges.cloudflare.com;",
                     },
                 ],
             },
