@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
     output: 'standalone',
+    swcMinify: false,  // Disable SWC minifier to avoid webpack error
     eslint: {
         // Warning: This allows production builds to successfully complete even if
         // your project has ESLint errors.

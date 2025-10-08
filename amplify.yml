@@ -5,8 +5,19 @@ frontend:
       commands:
         - npm ci
         - npx prisma generate
+        # Debug environment variables
+        - echo "=== Checking Environment Variables ==="
+        - echo "NEXTAUTH_SECRET length: ${#NEXTAUTH_SECRET}"
+        - echo "DATABASE_URL length: ${#DATABASE_URL}"
+        - echo "NEXTAUTH_URL: $NEXTAUTH_URL"
+        # List scripts directory
+        - ls -la scripts/
         # Inject environment variables into runtime files
-        - bash scripts/inject-env.sh
+        - bash scripts/inject-env.sh || echo "Script failed with exit code $?"
+        # Verify files were created
+        - echo "=== Checking generated files ==="
+        - ls -la .env* || echo "No .env files"
+        - head -n 3 src/lib/runtime-env.ts || echo "No runtime-env.ts"
     build:
       commands:
         - npm run build

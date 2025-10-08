@@ -3,24 +3,34 @@
 
 echo "=== Generating runtime environment configuration ==="
 
+# Debug: Check if variables are available
+if [ -z "$NEXTAUTH_SECRET" ]; then
+    echo "WARNING: NEXTAUTH_SECRET is not set in build environment"
+else
+    echo "NEXTAUTH_SECRET is available"
+fi
+
 # Create the runtime-env.ts file with actual values
 cat > src/lib/runtime-env.ts << EOF
 // Auto-generated during build - DO NOT EDIT
 // Generated at: $(date)
 
-process.env.NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET || '${NEXTAUTH_SECRET}';
-process.env.NEXTAUTH_URL = process.env.NEXTAUTH_URL || '${NEXTAUTH_URL}';
-process.env.DATABASE_URL = process.env.DATABASE_URL || '${DATABASE_URL}';
-process.env.NODE_ENV = 'production';
-process.env.REGION = process.env.REGION || '${REGION}';
-process.env.ACCESS_KEY_ID = process.env.ACCESS_KEY_ID || '${ACCESS_KEY_ID}';
-process.env.SECRET_ACCESS_KEY = process.env.SECRET_ACCESS_KEY || '${SECRET_ACCESS_KEY}';
-process.env.S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || '${S3_BUCKET_NAME}';
-process.env.EMAIL_FROM = process.env.EMAIL_FROM || '${EMAIL_FROM}';
-process.env.APP_URL = process.env.APP_URL || '${APP_URL}';
-process.env.USE_S3 = process.env.USE_S3 || '${USE_S3}';
+if (typeof window === 'undefined') {
+  // Only set environment variables on the server
+  process.env.NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET || '${NEXTAUTH_SECRET}';
+  process.env.NEXTAUTH_URL = process.env.NEXTAUTH_URL || '${NEXTAUTH_URL}';
+  process.env.DATABASE_URL = process.env.DATABASE_URL || '${DATABASE_URL}';
+  process.env.NODE_ENV = 'production';
+  process.env.REGION = process.env.REGION || '${REGION}';
+  process.env.ACCESS_KEY_ID = process.env.ACCESS_KEY_ID || '${ACCESS_KEY_ID}';
+  process.env.SECRET_ACCESS_KEY = process.env.SECRET_ACCESS_KEY || '${SECRET_ACCESS_KEY}';
+  process.env.S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || '${S3_BUCKET_NAME}';
+  process.env.EMAIL_FROM = process.env.EMAIL_FROM || '${EMAIL_FROM}';
+  process.env.APP_URL = process.env.APP_URL || '${APP_URL}';
+  process.env.USE_S3 = process.env.USE_S3 || '${USE_S3}';
+}
 
-console.log('Runtime environment loaded');
+export {};
 EOF
 
 echo "Runtime environment file generated"
