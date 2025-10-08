@@ -3,7 +3,7 @@ import { hash } from "bcryptjs";
 import crypto from "crypto";
 import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
 
-const ses = new SESv2Client({ region: process.env.AWS_REGION });
+const ses = new SESv2Client({ region: process.env.REGION || process.env.AWS_REGION || 'us-east-1' });
 
 export async function POST(req: Request) {
     const body = await req.json();

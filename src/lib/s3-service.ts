@@ -3,12 +3,12 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand } fr
 import fs from "fs/promises";
 import path from "path";
 
-// Initialize S3 client
+// Initialize S3 client - supports both AWS_ prefixed and non-prefixed env vars
 const s3Client = process.env.USE_S3 === "true" ? new S3Client({
-    region: process.env.AWS_REGION!,
+    region: process.env.REGION || process.env.AWS_REGION || 'us-east-1',
     credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+        accessKeyId: process.env.ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '',
     },
 }) : null;
 
@@ -90,7 +90,7 @@ async function uploadToS3(
     if (process.env.CLOUDFLARE_DOMAIN) {
         return `https://${process.env.CLOUDFLARE_DOMAIN}/${key}`;
     }
-    return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.REGION || process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`;
 }
 
 /**
