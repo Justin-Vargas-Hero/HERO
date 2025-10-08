@@ -5,10 +5,8 @@ frontend:
       commands:
         - npm ci
         - npx prisma generate
-        # Create .env.production from Amplify environment variables
-        - bash scripts/create-env.sh
-        - echo "Contents of .env.production:"
-        - cat .env.production | sed 's/=.*/=***/' || echo "No .env.production created"
+        # Inject environment variables into runtime files
+        - bash scripts/inject-env.sh
     build:
       commands:
         - npm run build
@@ -16,6 +14,7 @@ frontend:
     baseDirectory: .next
     files:
       - '**/*'
+      - '../.env.production'  # Include env file
   cache:
     paths:
       - node_modules/**/*
