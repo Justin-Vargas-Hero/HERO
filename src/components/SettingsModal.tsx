@@ -3,6 +3,7 @@
 
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 interface SettingsModalProps {
@@ -20,6 +21,7 @@ interface SettingsModalProps {
 type TabType = "profile" | "account" | "security";
 
 export default function SettingsModal({ open, onClose, user }: SettingsModalProps) {
+    const { update: updateSession } = useSession();
     const [activeTab, setActiveTab] = useState<TabType>("profile");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
@@ -75,8 +77,8 @@ export default function SettingsModal({ open, onClose, user }: SettingsModalProp
             const res = await fetch("/api/user/profile-picture", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    profilePicture: previewUrl 
+                body: JSON.stringify({
+                    profilePicture: previewUrl
                 }),
             });
 
@@ -86,7 +88,16 @@ export default function SettingsModal({ open, onClose, user }: SettingsModalProp
             setMessage("Profile picture updated successfully");
             setProfilePicture(previewUrl);
             setPreviewUrl("");
-            router.refresh(); // Refresh to update the profile picture in the header
+
+            // Update the session with new profile picture
+            await updateSession({
+                user: {
+                    ...user,
+                    profilePicture: data.profilePictureUrl || previewUrl
+                }
+            });
+
+            router.refresh();
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -110,6 +121,15 @@ export default function SettingsModal({ open, onClose, user }: SettingsModalProp
             setMessage("Profile picture removed");
             setProfilePicture("");
             setPreviewUrl("");
+
+            // Clear profile picture from session
+            await updateSession({
+                user: {
+                    ...user,
+                    profilePicture: null
+                }
+            });
+
             router.refresh();
         } catch (err: any) {
             setError(err.message);
@@ -170,9 +190,9 @@ export default function SettingsModal({ open, onClose, user }: SettingsModalProp
             const res = await fetch("/api/user/password", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     currentPassword,
-                    newPassword 
+                    newPassword
                 }),
             });
 
@@ -206,10 +226,10 @@ export default function SettingsModal({ open, onClose, user }: SettingsModalProp
                 resetForm();
                 onClose();
             }}>
-                <Transition.Child 
+                <Transition.Child
                     as={Fragment}
-                    enter="ease-out duration-200" 
-                    enterFrom="opacity-0" 
+                    enter="ease-out duration-200"
+                    enterFrom="opacity-0"
                     enterTo="opacity-100"
                     leave="ease-in duration-150"
                     leaveFrom="opacity-100"
