@@ -21,7 +21,7 @@ interface SettingsModalProps {
 type TabType = "profile" | "account" | "security";
 
 export default function SettingsModal({ open, onClose, user }: SettingsModalProps) {
-    const { update: updateSession } = useSession();
+    const { data: session, update: updateSession } = useSession();
     const [activeTab, setActiveTab] = useState<TabType>("profile");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
@@ -89,15 +89,16 @@ export default function SettingsModal({ open, onClose, user }: SettingsModalProp
             setProfilePicture(previewUrl);
             setPreviewUrl("");
 
-            // Update the session with new profile picture
+            // Update the entire session properly
             await updateSession({
+                ...session,
                 user: {
-                    ...user,
+                    ...session?.user,
                     profilePicture: data.profilePictureUrl || previewUrl
                 }
             });
 
-            router.refresh();
+            // No need for router.refresh() anymore
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -122,15 +123,16 @@ export default function SettingsModal({ open, onClose, user }: SettingsModalProp
             setProfilePicture("");
             setPreviewUrl("");
 
-            // Clear profile picture from session
+            // Update the entire session properly
             await updateSession({
+                ...session,
                 user: {
-                    ...user,
+                    ...session?.user,
                     profilePicture: null
                 }
             });
 
-            router.refresh();
+            // No need for router.refresh() anymore
         } catch (err: any) {
             setError(err.message);
         } finally {
