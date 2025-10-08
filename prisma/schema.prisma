@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // Optimize for serverless with connection pooling
+  // Add ?connection_limit=1&pool_timeout=20 to DATABASE_URL in production
+}
+
+model User {
+  id            String    @id @default(cuid())
+  firstName     String
+  lastName      String
+  username      String    @unique @db.VarChar(255)
+  email         String    @unique @db.VarChar(255)
+  password      String
+  profilePicture String?   @db.Text
+  dobMonth      Int
+  dobDay        Int
+  dobYear       Int
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  Session       Session[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String   @unique
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}

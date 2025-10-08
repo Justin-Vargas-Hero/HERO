@@ -1,0 +1,49 @@
+{
+  "name": "hero",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "build:prod": "NEXT_ESLINT_DISABLED=true next build",
+    "start": "next start",
+    "lint": "eslint",
+    "db:migrate": "dotenv -e .env.local -- prisma migrate dev",
+    "db:push": "dotenv -e .env.local -- prisma db push",
+    "db:generate": "dotenv -e .env.local -- prisma generate",
+    "db:studio": "dotenv -e .env.local -- prisma studio",
+    "prepare-deployment": "node scripts/prepare-deployment.js",
+    "check-deployment": "node scripts/check-deployment.js",
+    "amplify:build": "npx prisma generate && next build",
+    "amplify:start": "next start -p ${PORT:-3000}"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.10.0",
+    "@aws-sdk/client-s3": "^3.901.0",
+    "@aws-sdk/client-sesv2": "^3.901.0",
+    "@headlessui/react": "^2.2.9",
+    "@prisma/client": "^6.17.0",
+    "auth": "^1.0.2",
+    "bcryptjs": "^3.0.2",
+    "next": "15.5.4",
+    "next-auth": "^4.24.7",
+    "prisma": "^6.17.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-hot-toast": "^2.6.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@tailwindcss/postcss": "^4.1.14",
+    "@types/node": "^20",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
+    "autoprefixer": "^10.4.21",
+    "dotenv-cli": "^10.0.0",
+    "eslint": "^9.37.0",
+    "eslint-config-next": "^15.5.4",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.14",
+    "typescript": "^5.6.3"
+  }
+}

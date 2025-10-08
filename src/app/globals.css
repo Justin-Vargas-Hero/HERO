@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@theme inline {
+
+    /* COLORS */
+    --color-black: #000000;
+    --color-white: #ffffff;
+
+    /* FONTS */
+    --font-inter: var(--font-inter);
+    --font-manrope: var(--font-manrope);
+}
+
+.tooltip,
+.tooltip--error {
+    position: absolute;
+    left: calc(100% + 8px); /* extend tooltip outside input to the right */
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 9999;
+    display: block;
+    width: max-content;
+    min-width: 180px;
+    max-width: 420px; /* stretch up to full modal width */
+    white-space: pre-line; /* preserves Shift+Enter newlines */
+    font-size: 0.8rem;
+    line-height: 1.25rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+}
+
+/* Info tooltip (black) */
+.tooltip {
+    background: #111;
+    color: #fff;
+}
+.tooltip::before {
+    content: "";
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 8px;
+    border-style: solid;
+    border-color: transparent #111 transparent transparent;
+}
+
+/* Error tooltip (red) */
+.tooltip--error {
+    background: #dc2626; /* Tailwind red-600 */
+    color: #fff;
+}
+.tooltip--error::before {
+    content: "";
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 8px;
+    border-style: solid;
+    border-color: transparent #dc2626 transparent transparent;
+}
+
+/* Optional: subtle fade animation */
+@keyframes tooltipFade {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+.tooltip,
+.tooltip--error {
+    animation: tooltipFade 0.15s ease-out forwards;
+}
