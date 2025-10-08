@@ -5,6 +5,11 @@ frontend:
       commands:
         - npm ci
         - npx prisma generate
+        # Create .env.production from Amplify environment variables
+        - chmod +x scripts/create-env.sh
+        - ./scripts/create-env.sh
+        - echo "Contents of .env.production:"
+        - cat .env.production | sed 's/=.*/=***/' || echo "No .env.production created"
     build:
       commands:
         - npm run build
