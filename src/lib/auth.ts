@@ -49,22 +49,37 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        async jwt({ token, user }) {
-            if (user) {
-                token.id = user.id;
-                token.username = user.username;
-                token.profilePicture = user.profilePicture;
-            }
-            return token;
-        },
         async session({ session, token }) {
-            if (session.user) {
+            if (session.user && token) {
                 session.user.id = token.id as string;
                 session.user.username = token.username as string;
-                session.user.profilePicture = token.profilePicture as string;
+                session.user.profilePicture = token.profilePicture as string | undefined;
             }
             return session;
         },
+        async jwt({ token, user }) {
+            if (user) {
+                // When user logs in, get their full data from database
+                const dbUser = await prisma.user.findUnique({
+                    where: { id: user.id },
+                    select: {
+                        id: true,
+                        username: true,
+                        profilePicture: true,
+                        firstName: true,
+                        lastName: true,
+                    }
+                });
+
+                if (dbUser) {
+                    token.id = dbUser.id;
+                    token.username = dbUser.username;
+                    token.profilePicture = dbUser.profilePicture;
+                    token.name = `${dbUser.firstName} ${dbUser.lastName}`;
+                }
+            }
+            return token;
+        }
     },
     // 👇 Prevent redirecting to /api/auth/error
     pages: {
