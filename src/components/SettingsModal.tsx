@@ -74,7 +74,7 @@ export default function SettingsModal({ open, onClose, user }: SettingsModalProp
         setMessage("");
 
         try {
-            const res = await fetch("/api/user/profile-picture", {
+            const res = await fetch("/api/update/profile-picture", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -112,7 +112,7 @@ export default function SettingsModal({ open, onClose, user }: SettingsModalProp
         setMessage("");
 
         try {
-            const res = await fetch("/api/user/profile-picture", {
+            const res = await fetch("/api/update/profile-picture", {
                 method: "DELETE",
             });
 
@@ -152,7 +152,7 @@ export default function SettingsModal({ open, onClose, user }: SettingsModalProp
         setMessage("");
 
         try {
-            const res = await fetch("/api/user/email", {
+            const res = await fetch("/api/update/email", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: email.toLowerCase() }),
@@ -189,7 +189,7 @@ export default function SettingsModal({ open, onClose, user }: SettingsModalProp
         setMessage("");
 
         try {
-            const res = await fetch("/api/user/password", {
+            const res = await fetch("/api/update/password", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

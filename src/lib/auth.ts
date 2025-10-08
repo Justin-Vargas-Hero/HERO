@@ -49,17 +49,15 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        async session({ session, token }) {
-            if (session.user && token) {
-                session.user.id = token.id as string;
-                session.user.username = token.username as string;
-                session.user.profilePicture = token.profilePicture as string | undefined;
+        async jwt({ token, user, trigger, session }) {
+            // Handle manual session updates
+            if (trigger === "update" && session) {
+                // Update token with new session data
+                return { ...token, ...session.user };
             }
-            return session;
-        },
-        async jwt({ token, user }) {
+
+            // On initial sign in
             if (user) {
-                // When user logs in, get their full data from database
                 const dbUser = await prisma.user.findUnique({
                     where: { id: user.id },
                     select: {
@@ -78,7 +76,18 @@ export const authOptions: NextAuthOptions = {
                     token.name = `${dbUser.firstName} ${dbUser.lastName}`;
                 }
             }
+
             return token;
+        },
+
+        async session({ session, token }) {
+            if (session.user && token) {
+                session.user.id = token.id as string;
+                session.user.username = token.username as string;
+                session.user.profilePicture = token.profilePicture as string;
+                session.user.name = token.name as string;
+            }
+            return session;
         }
     },
     // 👇 Prevent redirecting to /api/auth/error
