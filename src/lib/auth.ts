@@ -3,7 +3,6 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
 import { compare } from "bcryptjs";
 import { checkEnvVars } from "@/lib/env-check";
-import "@/lib/runtime-env"; // Load runtime environment variables
 
 // Check environment variables on load
 if (typeof window === 'undefined') {
