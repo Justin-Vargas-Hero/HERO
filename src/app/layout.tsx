@@ -35,10 +35,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Topbar />
             <SideNav />
             <TurnstileLoader />
-            <main className="flex-grow">
+            <main className="flex-1 flex flex-col min-h-screen">
                 {children}
+                <Footer />
             </main>
-            <Footer />
         </SessionProviderWrapper>
         </body>
         </html>
