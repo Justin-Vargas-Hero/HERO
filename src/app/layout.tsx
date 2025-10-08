@@ -29,16 +29,19 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
     return (
         <html lang="en" className={`${inter.variable} ${manrope.variable}`}>
-        <body>
-        {/* ✅ Add the provider here */}
+        <body className="min-h-screen">
         <SessionProviderWrapper>
             <Topbar />
-            <SideNav />
+            <div className="flex">
+                <SideNav />
+                <main className="flex-1 flex flex-col min-h-[calc(100vh-56px)]">
+                    <div className="flex-1 px-6 py-4">
+                        {children}
+                    </div>
+                    <Footer />
+                </main>
+            </div>
             <TurnstileLoader />
-            <main className="flex-1 flex flex-col min-h-screen">
-                {children}
-                <Footer />
-            </main>
         </SessionProviderWrapper>
         </body>
         </html>

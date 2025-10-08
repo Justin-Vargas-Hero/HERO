@@ -14,7 +14,7 @@ export default function SideNav() {
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-56 h-screen fixed top-14 left-0 bg-white border-r border-gray-200 text-gray-700">
+    <aside className="hidden md:flex flex-col w-56 h-[calc(100vh-56px)] sticky top-14 bg-white border-r border-gray-200 text-gray-700">
       <nav className="flex flex-col gap-1 px-3 py-4">
         {links.map(({ href, label, icon: Icon }) => (
           <Link
