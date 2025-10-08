@@ -1,10 +1,14 @@
 import "./globals.css";
 import { ReactNode } from "react";
 import type { Metadata } from "next";
+
 import { Manrope, Inter } from "next/font/google";
+
 import Topbar from "@/components/Topbar";
 import SideNav from "@/components/LeftNavbar";
 import TurnstileLoader from "@/components/TurnstileLoader";
+import Footer from "@/components/Footer";
+
 import SessionProviderWrapper from "@/app/providers/SessionProviderWrapper";
 
 const manrope = Manrope({
@@ -31,7 +35,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Topbar />
             <SideNav />
             <TurnstileLoader />
-            {children}
+            <main className="flex-grow">
+                {children}
+            </main>
+            <Footer />
         </SessionProviderWrapper>
         </body>
         </html>

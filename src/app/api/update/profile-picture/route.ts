@@ -1,4 +1,4 @@
-// src/app/api/user/profile-picture/route.ts
+// src/app/api/update/profile-picture/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -48,7 +48,6 @@ export async function POST(req: NextRequest) {
             Key: key,
             Body: buffer,
             ContentType: `image/${fileExtension}`,
-            ACL: "public-read",
         });
 
         await s3Client.send(uploadCommand);
