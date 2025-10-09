@@ -9,6 +9,7 @@ export default function SideNav() {
   const links = [
     { href: '/', label: 'Home', icon: HomeIcon },
     { href: '/explore', label: 'Explore', icon: CompassIcon },
+    { href: '/market', label: 'Market Performance', icon: ChartIcon },
     { href: '/profile', label: 'Profile', icon: UserIcon },
     { href: '/more', label: 'More', icon: DotsIcon },
   ];
@@ -68,6 +69,30 @@ function CompassIcon({ className }: { className?: string }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M12 3a9 9 0 100 18 9 9 0 000-18zM14.12 14.12l1.41-4.24-4.24 1.41-1.41 4.24 4.24-1.41z"
+      />
+    </svg>
+  );
+}
+
+function ChartIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className={className}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 3v18h18"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M18.5 8.5l-5 5-4-4L3 16"
       />
     </svg>
   );

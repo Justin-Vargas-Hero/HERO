@@ -18,6 +18,7 @@
     "amplify:start": "next start -p ${PORT:-3000}"
   },
   "dependencies": {
+    "@alpacahq/alpaca-trade-api": "^3.0.1",
     "@auth/prisma-adapter": "^2.10.0",
     "@aws-sdk/client-s3": "^3.901.0",
     "@aws-sdk/client-sesv2": "^3.901.0",
@@ -44,6 +45,6 @@
     "eslint-config-next": "^15.5.4",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.14",
-    "typescript": "^5.6.3"
+    "typescript": "5.9.3"
   }
 }
