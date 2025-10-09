@@ -32,10 +32,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <body className="min-h-screen">
         <SessionProviderWrapper>
             <Topbar />
-            <div className="flex">
+            <div className="flex relative">
                 <SideNav />
-                <main className="flex-1 flex flex-col min-h-[calc(100vh-56px)]">
-                    <div className="flex-1 px-6 py-4">
+                <main className="flex-1 flex flex-col min-h-[calc(100vh-56px)] overflow-hidden">
+                    <div className="flex-1 px-6 py-4 overflow-auto">
                         {children}
                     </div>
                     <Footer />
