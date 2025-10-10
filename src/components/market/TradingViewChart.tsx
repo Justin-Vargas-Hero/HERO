@@ -4,9 +4,6 @@ import { useEffect, useRef } from 'react';
 import { 
   createChart, 
   ColorType,
-  LineSeries,
-  AreaSeries,
-  CandlestickSeries,
   IChartApi,
   ISeriesApi
 } from 'lightweight-charts';
@@ -104,12 +101,12 @@ export default function TradingViewChart({
     // Ensure data is sorted by time
     chartData.sort((a: any, b: any) => a.time - b.time);
 
-    // Create the appropriate series using addSeries
+    // Create the appropriate series
     let series: ISeriesApi<any>;
     
     if (type === 'candle') {
       // Use green/red colors matching the market page
-      series = chart.addSeries(CandlestickSeries, {
+      series = chart.addCandlestickSeries({
         upColor: '#16a34a', // green-600
         downColor: '#dc2626', // red-600
         borderVisible: false,
@@ -117,14 +114,14 @@ export default function TradingViewChart({
         wickDownColor: '#dc2626',
       });
     } else if (type === 'area') {
-      series = chart.addSeries(AreaSeries, {
+      series = chart.addAreaSeries({
         lineColor: '#16a34a', // green-600
         topColor: 'rgba(22, 163, 74, 0.3)',
         bottomColor: 'rgba(22, 163, 74, 0)',
         lineWidth: 2,
       });
     } else {
-      series = chart.addSeries(LineSeries, {
+      series = chart.addLineSeries({
         color: '#2563eb', // blue-600
         lineWidth: 2,
       });
