@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import AuthModal from "@/components/AuthModal";
 import UserDropdown from "@/components/UserDropdown";
+import { TickerSearch } from "@/components/market/TickerSearch";
+import { LivePing } from "@/components/LivePing";
 
 export default function Topbar() {
     const { data: session } = useSession();
@@ -45,37 +47,25 @@ export default function Topbar() {
                     </Link>
                 </div>
 
-                {/* Center search */}
+                {/* Center search - Now using TickerSearch */}
                 <div className="flex-1 flex justify-center px-4">
-                    <form
-                        action="/search"
-                        className="relative flex items-center w-full max-w-[560px] h-10 bg-hero-gray rounded-full border border-gray-200 pl-4 pr-2 focus-within:border-hero-black transition"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="w-5 h-5 text-gray-500"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z"
-                            />
-                        </svg>
-                        <input
-                            type="text"
-                            name="q"
-                            placeholder="Search"
-                            className="w-full bg-transparent border-none outline-none text-sm placeholder-gray-500 pl-3"
+                    <div className="w-full max-w-[560px]">
+                        <TickerSearch 
+                            placeholder="Search stocks, crypto, ETFs..."
+                            className="w-full"
                         />
-                    </form>
+                    </div>
                 </div>
 
                 {/* Right side actions */}
                 <div className="flex items-center justify-end gap-3">
+                    {/* Market Status */}
+                    <div className="flex items-center gap-2 text-sm font-inter text-gray-600">
+                        <LivePing status={new Date().getHours() >= 9 && new Date().getHours() < 16 ? 'live' : 'offline'} />
+                        <span className="hidden sm:inline">
+                            Market {new Date().getHours() >= 9 && new Date().getHours() < 16 ? 'Open' : 'Closed'}
+                        </span>
+                    </div>
                     {/* If user logged in → show user dropdown */}
                     {session?.user ? (
                         <UserDropdown 
