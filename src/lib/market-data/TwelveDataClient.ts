@@ -13,6 +13,20 @@ interface MarketQuote {
   timestamp: number;
   exchange?: string;
   currency?: string;
+  // Pre/Post-market fields
+  preMarketPrice?: number;
+  preMarketChange?: number;
+  preMarketChangePercent?: number;
+  preMarketVolume?: number;
+  preMarketTime?: string;
+  postMarketPrice?: number;
+  postMarketChange?: number;
+  postMarketChangePercent?: number;
+  postMarketVolume?: number;
+  postMarketTime?: string;
+  isMarketOpen?: boolean;
+  // Extended hours indicator
+  extendedHours?: boolean;
 }
 
 interface CachedQuote {
@@ -184,8 +198,9 @@ export class TwelveDataClient {
 
     this.requestCount++;
 
+    // Include pre/post-market data
     const response = await fetch(
-      `https://api.twelvedata.com/quote?symbol=${symbol}&apikey=${this.apiKey}`
+      `https://api.twelvedata.com/quote?symbol=${symbol}&prepost=true&apikey=${this.apiKey}`
     );
 
     if (!response.ok) {
@@ -216,8 +231,9 @@ export class TwelveDataClient {
     this.requestCount++;
 
     const symbolString = symbols.join(',');
+    // Include pre/post-market data
     const response = await fetch(
-      `https://api.twelvedata.com/quote?symbol=${symbolString}&apikey=${this.apiKey}`
+      `https://api.twelvedata.com/quote?symbol=${symbolString}&prepost=true&apikey=${this.apiKey}`
     );
 
     if (!response.ok) {
@@ -252,7 +268,7 @@ export class TwelveDataClient {
    * Format raw API data into MarketQuote
    */
   private formatQuote(symbol: string, data: any): MarketQuote {
-    return {
+    const quote: MarketQuote = {
       symbol: symbol.toUpperCase(),
       price: parseFloat(data.close || data.price || 0),
       change: parseFloat(data.change || 0),
@@ -264,8 +280,42 @@ export class TwelveDataClient {
       previousClose: parseFloat(data.previous_close || 0),
       timestamp: Date.now(),
       exchange: data.exchange,
-      currency: data.currency
+      currency: data.currency,
+      isMarketOpen: data.is_market_open
     };
+
+    // Add pre-market data if available
+    if (data.premarket_price) {
+      quote.preMarketPrice = parseFloat(data.premarket_price);
+      quote.preMarketChange = parseFloat(data.premarket_change || 0);
+      quote.preMarketChangePercent = parseFloat(data.premarket_percent_change || 0);
+      quote.preMarketVolume = parseInt(data.premarket_volume || 0);
+      quote.preMarketTime = data.premarket_time;
+    }
+
+    // Add post-market data if available
+    if (data.postmarket_price) {
+      quote.postMarketPrice = parseFloat(data.postmarket_price);
+      quote.postMarketChange = parseFloat(data.postmarket_change || 0);
+      quote.postMarketChangePercent = parseFloat(data.postmarket_percent_change || 0);
+      quote.postMarketVolume = parseInt(data.postmarket_volume || 0);
+      quote.postMarketTime = data.postmarket_time;
+    }
+
+    // Determine if we're in extended hours
+    const now = new Date();
+    const hour = now.getHours();
+    const isWeekday = now.getDay() >= 1 && now.getDay() <= 5;
+    
+    // Pre-market: 4:00 AM - 9:30 AM ET (9:00 - 14:30 UTC)
+    // Post-market: 4:00 PM - 8:00 PM ET (21:00 - 01:00 UTC)
+    if (isWeekday) {
+      if ((hour >= 9 && hour < 14.5) || (hour >= 21 || hour < 1)) {
+        quote.extendedHours = true;
+      }
+    }
+
+    return quote;
   }
 
   /**
@@ -324,8 +374,9 @@ export class TwelveDataClient {
    * Get time series data for charts
    */
   async getTimeSeries(symbol: string, interval: string = '5min', outputsize: number = 78): Promise<any> {
+    // Include pre/post-market data for time series
     const response = await fetch(
-      `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=${interval}&outputsize=${outputsize}&apikey=${this.apiKey}`
+      `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=${interval}&outputsize=${outputsize}&prepost=true&apikey=${this.apiKey}`
     );
 
     if (!response.ok) {

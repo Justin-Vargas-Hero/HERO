@@ -1,17 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import AuthModal from "@/components/AuthModal";
 import UserDropdown from "@/components/UserDropdown";
 import { TickerSearch } from "@/components/market/TickerSearch";
 import { LivePing } from "@/components/LivePing";
+import { isMarketOpen, getMarketStatus } from "@/lib/market-utils";
 
 export default function Topbar() {
     const { data: session } = useSession();
     const [menuOpen, setMenuOpen] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
+    const [marketStatus, setMarketStatus] = useState<'Open' | 'Closed' | 'Pre-Market' | 'After-Hours'>('Closed');
+    const [isOpen, setIsOpen] = useState(false);
+
+    // Update market status every minute
+    useEffect(() => {
+        const updateMarketStatus = () => {
+            setMarketStatus(getMarketStatus());
+            setIsOpen(isMarketOpen());
+        };
+
+        // Initial update
+        updateMarketStatus();
+
+        // Update every minute
+        const interval = setInterval(updateMarketStatus, 60000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <header className="sticky top-0 z-50 border-b border-gray-200 backdrop-blur-md bg-white/80">
@@ -61,9 +80,9 @@ export default function Topbar() {
                 <div className="flex items-center justify-end gap-3">
                     {/* Market Status */}
                     <div className="flex items-center gap-2 text-sm font-inter text-gray-600">
-                        <LivePing status={new Date().getHours() >= 9 && new Date().getHours() < 16 ? 'live' : 'offline'} />
+                        <LivePing status={isOpen ? 'live' : 'offline'} />
                         <span className="hidden sm:inline">
-                            Market {new Date().getHours() >= 9 && new Date().getHours() < 16 ? 'Open' : 'Closed'}
+                            Market {marketStatus}
                         </span>
                     </div>
                     {/* If user logged in → show user dropdown */}
