@@ -8,6 +8,9 @@ export interface TickerSymbol {
   popularity?: number; // For ranking search results
 }
 
+// Import Binance USD pairs
+import { BINANCE_USD_TICKERS } from './binance-usd-tickers';
+
 // Process NYSE symbols (top selections from your list)
 const NYSE_TICKERS: TickerSymbol[] = [
   { symbol: "A", name: "Agilent Technologies", exchange: "NYSE", popularity: 50 },
@@ -532,39 +535,8 @@ const NYSE_TICKERS: TickerSymbol[] = [
   { symbol: "ZTS", name: "Zoetis", exchange: "NYSE", popularity: 45 }
 ];
 
-// Crypto tickers
-const CRYPTO_TICKERS: TickerSymbol[] = [
-  { symbol: "BTC", name: "Bitcoin", exchange: "CRYPTO", popularity: 100 },
-  { symbol: "ETH", name: "Ethereum", exchange: "CRYPTO", popularity: 95 },
-  { symbol: "BNB", name: "Binance Coin", exchange: "CRYPTO", popularity: 70 },
-  { symbol: "SOL", name: "Solana", exchange: "CRYPTO", popularity: 80 },
-  { symbol: "XRP", name: "Ripple", exchange: "CRYPTO", popularity: 75 },
-  { symbol: "USDT", name: "Tether", exchange: "CRYPTO", popularity: 60 },
-  { symbol: "USDC", name: "USD Coin", exchange: "CRYPTO", popularity: 55 },
-  { symbol: "ADA", name: "Cardano", exchange: "CRYPTO", popularity: 70 },
-  { symbol: "DOGE", name: "Dogecoin", exchange: "CRYPTO", popularity: 85 },
-  { symbol: "AVAX", name: "Avalanche", exchange: "CRYPTO", popularity: 65 },
-  { symbol: "SHIB", name: "Shiba Inu", exchange: "CRYPTO", popularity: 75 },
-  { symbol: "DOT", name: "Polkadot", exchange: "CRYPTO", popularity: 60 },
-  { symbol: "MATIC", name: "Polygon", exchange: "CRYPTO", popularity: 70 },
-  { symbol: "LINK", name: "Chainlink", exchange: "CRYPTO", popularity: 65 },
-  { symbol: "NEAR", name: "NEAR Protocol", exchange: "CRYPTO", popularity: 55 },
-  { symbol: "UNI", name: "Uniswap", exchange: "CRYPTO", popularity: 60 },
-  { symbol: "LTC", name: "Litecoin", exchange: "CRYPTO", popularity: 65 },
-  { symbol: "FTM", name: "Fantom", exchange: "CRYPTO", popularity: 50 },
-  { symbol: "ATOM", name: "Cosmos", exchange: "CRYPTO", popularity: 55 },
-  { symbol: "XLM", name: "Stellar", exchange: "CRYPTO", popularity: 50 },
-  { symbol: "ALGO", name: "Algorand", exchange: "CRYPTO", popularity: 45 },
-  { symbol: "VET", name: "VeChain", exchange: "CRYPTO", popularity: 50 },
-  { symbol: "ICP", name: "Internet Computer", exchange: "CRYPTO", popularity: 55 },
-  { symbol: "FIL", name: "Filecoin", exchange: "CRYPTO", popularity: 50 },
-  { symbol: "SAND", name: "The Sandbox", exchange: "CRYPTO", popularity: 60 },
-  { symbol: "MANA", name: "Decentraland", exchange: "CRYPTO", popularity: 55 },
-  { symbol: "AXS", name: "Axie Infinity", exchange: "CRYPTO", popularity: 60 },
-  { symbol: "AAVE", name: "Aave", exchange: "CRYPTO", popularity: 50 },
-  { symbol: "CRV", name: "Curve DAO", exchange: "CRYPTO", popularity: 45 },
-  { symbol: "MKR", name: "Maker", exchange: "CRYPTO", popularity: 45 }
-];
+// Note: We use BINANCE_USD_TICKERS which contains all USD pairs from Binance
+// This provides comprehensive cryptocurrency coverage from crypto.json
 
 // Popular ETFs
 const ETF_TICKERS: TickerSymbol[] = [
@@ -603,7 +575,7 @@ const ETF_TICKERS: TickerSymbol[] = [
 // Combine all tickers
 export const ALL_TICKERS: TickerSymbol[] = [
   ...NYSE_TICKERS,
-  ...CRYPTO_TICKERS,
+  ...BINANCE_USD_TICKERS,
   ...ETF_TICKERS
 ];
 

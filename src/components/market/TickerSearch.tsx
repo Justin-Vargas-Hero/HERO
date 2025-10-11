@@ -16,10 +16,10 @@ interface TickerSearchProps {
   placeholder?: string;
 }
 
-export function TickerSearch({ 
-  onSelectTicker, 
+export function TickerSearch({
+  onSelectTicker,
   className,
-  placeholder = "Search stocks, crypto..."
+  placeholder = "Search stocks, crypto (Binance USD pairs)..."
 }: TickerSearchProps) {
   const router = useRouter();
   const [query, setQuery] = useState('');

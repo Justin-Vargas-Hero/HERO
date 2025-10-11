@@ -69,8 +69,8 @@ export default function Topbar() {
                 {/* Center search - Now using TickerSearch */}
                 <div className="flex-1 flex justify-center px-4">
                     <div className="w-full max-w-[560px]">
-                        <TickerSearch 
-                            placeholder="Search stocks, crypto, ETFs..."
+                        <TickerSearch
+                            placeholder="Search stocks, crypto (200+ Binance USD pairs), ETFs..."
                             className="w-full"
                         />
                     </div>
