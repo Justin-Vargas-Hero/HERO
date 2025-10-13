@@ -1,5 +1,18 @@
 import { NextResponse } from 'next/server';
 
+interface EarningsEvent {
+  symbol: string;
+  name: string;
+  date: string;
+  time: string;
+  estimate: number | null;
+  actual: number | null;
+  difference: number | null;
+  surprise_prc: number | null;
+  exchange: string;
+  country: string;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
@@ -17,7 +30,7 @@ export async function GET(request: Request) {
 
     // TwelveData returns earnings grouped by date
     // Structure: { "earnings": { "2024-01-01": [...] } }
-    let events = [];
+    let events: EarningsEvent[] = [];
 
     if (data.earnings && typeof data.earnings === 'object') {
       // Get the earnings for the requested date
@@ -52,7 +65,7 @@ export async function GET(request: Request) {
         });
 
         // Transform to our format
-        events = Array.from(uniqueCompanies.values()).map((item: any) => ({
+        events = Array.from(uniqueCompanies.values()).map((item: any): EarningsEvent => ({
           symbol: item.symbol,
           name: item.name || item.symbol,
           date: date,
