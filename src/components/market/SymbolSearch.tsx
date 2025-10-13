@@ -171,7 +171,7 @@ export function SymbolSearch({
       {isOpen && (results.length > 0 || query.length > 0) && (
         <div className="absolute top-12 left-0 right-0 bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden z-50">
           {/* Results */}
-          <div className="max-h-96 overflow-y-auto bg-white">
+          <div className="max-h-96 overflow-y-auto bg-white thin-scrollbar">
             {/* Header for popular/recent */}
             {!query && (
               <div className="px-4 py-2 border-b border-gray-100">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TrendingUp, Calendar, Activity, DollarSign, Newspaper, Clock, ExternalLink } from 'lucide-react';
+import { Newspaper, Clock, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { formatPrice, formatVolume } from '@/hooks/useMarketData';
 import { Watchlist } from '@/components/market/Watchlist';
@@ -91,8 +91,8 @@ export default function MarketPage() {
           const displayName = sym === 'SPY' ? 'S&P 500' :
                             sym === 'QQQ' ? 'NASDAQ' :
                             sym === 'DIA' ? 'DOW' :
-                            sym === 'BTC/USD' ? 'Bitcoin' :
-                            'Ethereum';
+                            sym === 'BTC/USD' ? 'BTC' :
+                            'ETH';
 
           return {
             symbol: displaySymbol,
@@ -289,8 +289,7 @@ export default function MarketPage() {
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
               <div className="p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-manrope font-semibold flex items-center">
-                    <Activity className="mr-2 text-gray-600" size={18} />
+                  <h2 className="text-lg font-manrope font-semibold">
                     Market Movers
                   </h2>
                   <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
@@ -388,12 +387,11 @@ export default function MarketPage() {
             {/* Market Calendar */}
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm mt-6">
               <div className="p-5">
-                <h2 className="text-lg font-manrope font-semibold flex items-center mb-4">
-                  <Calendar className="mr-2 text-gray-600" size={18} />
+                <h2 className="text-lg font-manrope font-semibold mb-4">
                   Today's Events
                 </h2>
 
-                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 thin-scrollbar">
                   {/* Earnings */}
                   {earnings.length > 0 && (
                     <div>
@@ -403,18 +401,30 @@ export default function MarketPage() {
                       <div className="space-y-2">
                         {earnings.map((item, idx) => (
                           <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                            <div className="flex items-center space-x-2">
-                              <DollarSign className="text-blue-600" size={16} />
-                              <div>
-                                <p className="font-inter text-sm font-medium">{item.symbol}</p>
-                                <p className="text-xs font-inter text-gray-600">{item.name}</p>
-                              </div>
+                            <div>
+                              <p className="font-inter text-sm font-medium">{item.symbol}</p>
+                              <p className="text-xs font-inter text-gray-600">{item.name}</p>
                             </div>
                             <div className="text-right">
                               <p className="text-xs font-inter font-medium">{item.time || 'TBD'}</p>
-                              {item.estimate && (
+                              {item.actual !== null && item.actual !== undefined ? (
+                                <div className="flex flex-col">
+                                  <p className={`text-xs font-inter font-medium ${
+                                    item.estimate && parseFloat(item.actual) > parseFloat(item.estimate)
+                                      ? 'text-green-600'
+                                      : item.estimate && parseFloat(item.actual) < parseFloat(item.estimate)
+                                      ? 'text-red-600'
+                                      : 'text-gray-900'
+                                  }`}>
+                                    Actual: ${item.actual}
+                                  </p>
+                                  {item.estimate && (
+                                    <p className="text-xs font-inter text-gray-500">Est: ${item.estimate}</p>
+                                  )}
+                                </div>
+                              ) : item.estimate ? (
                                 <p className="text-xs font-inter text-gray-500">Est: ${item.estimate}</p>
-                              )}
+                              ) : null}
                             </div>
                           </div>
                         ))}
@@ -431,17 +441,16 @@ export default function MarketPage() {
                       <div className="space-y-2">
                         {dividends.map((item, idx) => (
                           <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                            <div className="flex items-center space-x-2">
-                              <DollarSign className="text-green-600" size={16} />
-                              <div>
-                                <p className="font-inter text-sm font-medium">{item.symbol}</p>
-                                <p className="text-xs font-inter text-gray-600">{item.name}</p>
-                              </div>
+                            <div>
+                              <p className="font-inter text-sm font-medium">{item.symbol}</p>
+                              <p className="text-xs font-inter text-gray-600">{item.name}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-xs font-inter font-medium">${item.amount || '-'}</p>
+                              <p className="text-xs font-inter font-medium text-green-600">
+                                ${item.amount ? parseFloat(item.amount).toFixed(2) : '0.00'}
+                              </p>
                               {item.yield && (
-                                <p className="text-xs font-inter text-gray-500">Yield: {item.yield}</p>
+                                <p className="text-xs font-inter text-gray-500">Yield: {item.yield}%</p>
                               )}
                             </div>
                           </div>
@@ -459,15 +468,14 @@ export default function MarketPage() {
                       <div className="space-y-2">
                         {ipos.map((item, idx) => (
                           <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                            <div className="flex items-center space-x-2">
-                              <TrendingUp className="text-purple-600" size={16} />
-                              <div>
-                                <p className="font-inter text-sm font-medium">{item.symbol}</p>
-                                <p className="text-xs font-inter text-gray-600">{item.name}</p>
-                              </div>
+                            <div>
+                              <p className="font-inter text-sm font-medium">{item.symbol}</p>
+                              <p className="text-xs font-inter text-gray-600">{item.name}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-xs font-inter font-medium">{item.price_range || 'TBD'}</p>
+                              <p className="text-xs font-inter font-medium text-purple-600">
+                                {item.price_range || 'Price TBD'}
+                              </p>
                               {item.exchange && (
                                 <p className="text-xs font-inter text-gray-500">{item.exchange}</p>
                               )}

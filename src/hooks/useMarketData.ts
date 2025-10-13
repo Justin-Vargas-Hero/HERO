@@ -202,6 +202,32 @@ export function formatPrice(price: number, decimals: number = 2): string {
 }
 
 /**
+ * Format price change with +/- sign and proper commas
+ */
+export function formatPriceChange(change: number, includeSign: boolean = true): string {
+  const sign = change > 0 ? '+' : '';
+  const formatted = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(Math.abs(change));
+
+  return includeSign && change > 0 ? `${sign}$${formatted}` : `$${formatted}`;
+}
+
+/**
+ * Format percent change with +/- sign
+ */
+export function formatPercentChange(percent: number, includeSign: boolean = true): string {
+  const sign = percent > 0 ? '+' : '';
+  const formatted = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(Math.abs(percent));
+
+  return includeSign && percent > 0 ? `${sign}${formatted}%` : `${formatted}%`;
+}
+
+/**
  * Format large numbers
  */
 export function formatVolume(volume: number): string {
