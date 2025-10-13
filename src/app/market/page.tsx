@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Newspaper, Clock, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { formatPrice, formatVolume } from '@/hooks/useMarketData';
 import { Watchlist } from '@/components/market/Watchlist';
 import { ScrollingTicker } from '@/components/market/ScrollingTicker';
-import { MarketNews } from '@/components/market/MarketNews';
+import { NewsWidget } from '@/components/market/NewsWidget';
 import { InfoTooltip } from '@/components/InfoTooltip';
 import { marketDataCache } from '@/lib/market-data/cache';
 import { marketSyncManager } from '@/lib/market-data/sync-manager';
@@ -32,14 +31,6 @@ interface CalendarEvent {
   yield?: string;
   price_range?: string;
   exchange?: string;
-}
-
-interface NewsItem {
-  title: string;
-  description: string;
-  source: string;
-  url: string;
-  timestamp: string;
 }
 
 export default function MarketPage() {
@@ -424,7 +415,11 @@ export default function MarketPage() {
             </div>
 
             {/* Market News */}
-            <MarketNews />
+            <NewsWidget
+              title="Market News"
+              maxItems={10}
+              showInfoTooltip={true}
+            />
           </div>
 
           {/* Right Column - Watchlist and Today's Events */}

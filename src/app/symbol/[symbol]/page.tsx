@@ -7,19 +7,12 @@ import { useMarketQuote } from '@/hooks/useMarketData';
 import { getSymbol } from '@/data/symbol-database';
 import { formatPrice, formatVolume } from '@/hooks/useMarketData';
 import Link from 'next/link';
-import { ArrowLeft, Star, Clock, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Star } from 'lucide-react';
 import TradingViewChart from '@/components/market/TradingViewChart';
 import { marketSyncManager } from '@/lib/market-data/sync-manager';
 import { Watchlist } from '@/components/market/Watchlist';
+import { NewsWidget } from '@/components/market/NewsWidget';
 import { formatNumber, formatCurrency } from '@/lib/utils';
-
-interface NewsItem {
-  title: string;
-  description: string;
-  source: string;
-  url: string;
-  timestamp: string;
-}
 
 interface CompanyProfile {
   symbol?: string;
@@ -141,7 +134,6 @@ export default function SymbolPage() {
   const symbolData = getSymbol(symbolCode);
   const [isWatchlist, setIsWatchlist] = useState(false);
   const [historicalData, setHistoricalData] = useState<any[]>([]);
-  const [news, setNews] = useState<NewsItem[]>([]);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -352,36 +344,6 @@ export default function SymbolPage() {
       unsubscribe();
     };
   }, [symbolCode, selectedPeriod]);
-
-  // Fetch news - synchronized at :00 seconds
-  useEffect(() => {
-    if (!symbolCode) return;
-
-    const fetchNews = () => {
-      fetch(`/api/market/news?symbol=${encodeURIComponent(symbolCode)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data && Array.isArray(data)) {
-            setNews(data.slice(0, 5));
-          }
-        })
-        .catch(err => console.error('Failed to fetch news:', err));
-    };
-
-    // Initial fetch
-    fetchNews();
-
-    // Subscribe to synchronized updates at :00 seconds
-    const unsubscribe = marketSyncManager.subscribe(`symbol-news-${symbolCode}`, () => {
-      console.log('Symbol news sync update triggered');
-      fetchNews();
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [symbolCode]);
-
 
   // Toggle watchlist
   const toggleWatchlist = () => {
@@ -657,41 +619,12 @@ export default function SymbolPage() {
             </div>
 
             {/* News Section */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-              <h2 className="text-lg font-manrope font-semibold mb-4">Latest {symbolData.symbol} News</h2>
-              {news.length > 0 ? (
-                <div className="space-y-4">
-                  {news.map((item, index) => (
-                    <div key={index} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
-                      <a 
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group"
-                      >
-                        <h3 className="font-inter text-gray-900 group-hover:text-blue-600 mb-1">
-                          {item.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-2 line-clamp-2 font-inter">
-                          {item.description}
-                        </p>
-                        <div className="flex items-center gap-2 text-xs text-gray-500 font-inter">
-                          <span>{item.source}</span>
-                          <span>•</span>
-                          <Clock className="h-3 w-3" />
-                          <span>{new Date(item.timestamp).toLocaleString()}</span>
-                          <ExternalLink className="h-3 w-3 ml-auto" />
-                        </div>
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500 font-inter">
-                  <p>No news available for {symbolData.symbol}</p>
-                </div>
-              )}
-            </div>
+            <NewsWidget
+              symbol={symbolCode}
+              title={`Latest ${symbolData.symbol} News`}
+              maxItems={5}
+              showInfoTooltip={false}
+            />
           </div>
 
           {/* Right Column - Watchlist */}
