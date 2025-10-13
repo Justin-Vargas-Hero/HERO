@@ -12,19 +12,17 @@ interface TickerItem {
   changePercent: number;
 }
 
-// Get popular stocks from ALL_SYMBOLS for the ticker
-// Take a mix of different exchanges and popular stocks
-const TICKER_SYMBOLS = ALL_SYMBOLS
-  .filter(symbol => {
-    // Include major stocks and exclude cryptos for the ticker
-    const popularStocks = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA',
-      'JPM', 'V', 'JNJ', 'WMT', 'PG', 'MA', 'UNH', 'DIS',
-      'HD', 'BAC', 'XOM', 'CVX', 'PFE', 'ABBV', 'KO', 'PEP',
-      'VZ', 'T', 'NFLX', 'AMD', 'INTC', 'CRM', 'ORCL', 'IBM',
-      'SPY', 'QQQ', 'COIN', 'PLTR', 'SOFI', 'HOOD', 'RBLX', 'ABNB'];
-    return popularStocks.includes(symbol.symbol);
-  })
-  .map(symbol => symbol.symbol);
+// Priority symbols that load first for quick display
+const PRIORITY_SYMBOLS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'SPY', 'QQQ'];
+
+// Additional symbols to load after priority symbols
+const ADDITIONAL_SYMBOLS = ['JPM', 'V', 'JNJ', 'WMT', 'PG', 'MA', 'UNH', 'DIS',
+  'HD', 'BAC', 'XOM', 'CVX', 'PFE', 'ABBV', 'KO', 'PEP',
+  'VZ', 'T', 'NFLX', 'AMD', 'INTC', 'CRM', 'ORCL', 'IBM',
+  'DIA', 'COIN', 'PLTR', 'SOFI', 'HOOD', 'RBLX', 'ABNB'];
+
+// All symbols combined
+const ALL_TICKER_SYMBOLS = [...PRIORITY_SYMBOLS, ...ADDITIONAL_SYMBOLS];
 
 export function ScrollingTicker() {
   const [tickerData, setTickerData] = useState<TickerItem[]>([]);
@@ -33,11 +31,12 @@ export function ScrollingTicker() {
   useEffect(() => {
     const fetchTickerData = async () => {
       try {
-        const quotes = await marketDataCache.getBatchQuotes(TICKER_SYMBOLS);
+        // First, fetch priority symbols for quick initial display
+        const priorityQuotes = await marketDataCache.getBatchQuotes(PRIORITY_SYMBOLS);
         const items: TickerItem[] = [];
 
-        TICKER_SYMBOLS.forEach(symbol => {
-          const quote = quotes.get(symbol);
+        PRIORITY_SYMBOLS.forEach(symbol => {
+          const quote = priorityQuotes.get(symbol);
           if (quote) {
             items.push({
               symbol: symbol,
@@ -48,6 +47,28 @@ export function ScrollingTicker() {
           }
         });
 
+        // Show priority symbols immediately
+        if (items.length > 0) {
+          setTickerData(items);
+          setLoading(false);
+        }
+
+        // Then fetch additional symbols in the background
+        const additionalQuotes = await marketDataCache.getBatchQuotes(ADDITIONAL_SYMBOLS);
+
+        ADDITIONAL_SYMBOLS.forEach(symbol => {
+          const quote = additionalQuotes.get(symbol);
+          if (quote) {
+            items.push({
+              symbol: symbol,
+              price: quote.price,
+              change: quote.change,
+              changePercent: quote.changePercent
+            });
+          }
+        });
+
+        // Update with all symbols
         setTickerData(items);
       } catch (error) {
         console.error('Failed to fetch ticker data:', error);
@@ -59,8 +80,8 @@ export function ScrollingTicker() {
     // Initial fetch
     fetchTickerData();
 
-    // Subscribe to updates
-    const unsubscribers = TICKER_SYMBOLS.map(symbol => {
+    // Subscribe to updates for all symbols
+    const unsubscribers = ALL_TICKER_SYMBOLS.map(symbol => {
       return marketDataCache.subscribe(symbol, (data) => {
         setTickerData(prev => prev.map(item =>
           item.symbol === symbol
@@ -79,12 +100,74 @@ export function ScrollingTicker() {
     };
   }, []);
 
+  // Show skeleton loading with animated scrolling placeholders
   if (loading || tickerData.length === 0) {
+    // Create skeleton items for loading state
+    const skeletonItems = Array.from({ length: 20 }, (_, i) => i);
+    const duplicatedSkeleton = [...skeletonItems, ...skeletonItems];
+
     return (
-      <div className="w-full h-12 bg-white border-y border-gray-200">
-        <div className="h-full flex items-center justify-center">
-          <div className="animate-pulse text-gray-400 text-sm">Loading market data...</div>
+      <div className="w-full bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+        <div className="ticker-container">
+          <div className="ticker-content">
+            {duplicatedSkeleton.map((_, index) => (
+              <div
+                key={`skeleton-${index}`}
+                className="ticker-item animate-pulse"
+              >
+                <span className="h-3 w-12 bg-gray-200 rounded"></span>
+                <span className="h-3 w-16 bg-gray-200 rounded"></span>
+                <span className="h-3 w-14 bg-gray-200 rounded"></span>
+                <span className="ticker-spacer" />
+              </div>
+            ))}
+          </div>
         </div>
+
+        <style jsx>{`
+          .ticker-container {
+            height: 32px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            background: white;
+          }
+
+          .ticker-content {
+            display: flex;
+            animation: scroll 90s linear infinite;
+            white-space: nowrap;
+            align-items: center;
+          }
+
+          .ticker-item {
+            display: inline-flex;
+            align-items: center;
+            padding: 0 8px;
+            height: 52px;
+            gap: 12px;
+          }
+
+          .ticker-spacer {
+            width: 30px;
+            display: inline-block;
+          }
+
+          @keyframes scroll {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(-50%);
+            }
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .ticker-content {
+              animation: none;
+            }
+          }
+        `}</style>
       </div>
     );
   }
