@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { marketSyncManager } from '@/lib/market-data/sync-manager';
 
 interface StockData {
     symbol: string;
@@ -34,13 +35,13 @@ export default function MarketHeatmap() {
                 const response = await fetch(`/api/market?index=${selectedIndex}`);
                 if (!response.ok) throw new Error('Failed to fetch market data');
                 const data = await response.json();
-                
+
                 if (selectedIndex === 'SP500') {
                     setStocks(data.data || []);
                 } else {
                     setNasdaqStocks(data.data || []);
                 }
-                
+
                 setLoading(false);
                 setLastUpdated(new Date());
             } catch (err) {
@@ -49,9 +50,18 @@ export default function MarketHeatmap() {
             }
         };
 
+        // Initial fetch
         fetchMarketData();
-        const interval = setInterval(fetchMarketData, 60000);
-        return () => clearInterval(interval);
+
+        // Subscribe to synchronized updates at :00 seconds
+        const unsubscribe = marketSyncManager.subscribe(`market-heatmap-${selectedIndex}`, () => {
+            console.log('Market heatmap sync update triggered');
+            fetchMarketData();
+        });
+
+        return () => {
+            unsubscribe();
+        };
     }, [selectedIndex]);
 
     const getColorClass = (changePercent: number) => {

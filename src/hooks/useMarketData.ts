@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { marketSyncManager } from '@/lib/market-data/sync-manager';
 
 interface MarketQuote {
   symbol: string;
@@ -17,8 +18,8 @@ interface MarketQuote {
 
 interface UseMarketDataOptions {
   symbols: string[];
-  pollInterval?: number;
   enabled?: boolean;
+  syncUpdates?: boolean; // Enable synchronized updates at :00 seconds
 }
 
 interface UseMarketDataReturn {
@@ -27,23 +28,26 @@ interface UseMarketDataReturn {
   error: Error | null;
   refresh: () => Promise<void>;
   stats?: any;
+  nextUpdateIn?: number; // Seconds until next update
 }
 
 /**
- * React hook for fetching and polling market data
- * Implements smart polling with automatic pause when tab is inactive
+ * React hook for fetching market data with synchronized updates
+ * Updates ONLY at the top of each minute (:00 seconds) to prevent request spamming
  */
 export function useMarketData({
   symbols,
-  pollInterval = 10000, // Default 10 seconds
-  enabled = true
+  enabled = true,
+  syncUpdates = true // Default to synchronized updates
 }: UseMarketDataOptions): UseMarketDataReturn {
   const [quotes, setQuotes] = useState<Map<string, MarketQuote>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [stats, setStats] = useState<any>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [nextUpdateIn, setNextUpdateIn] = useState<number>(0);
   const isVisibleRef = useRef(true);
+  const lastFetchRef = useRef<number>(0);
+  const subscriptionId = useRef<string>(`market-data-${Date.now()}`);
 
   const fetchQuotes = useCallback(async () => {
     if (symbols.length === 0) {
@@ -51,6 +55,14 @@ export function useMarketData({
       setLoading(false);
       return;
     }
+
+    // Prevent duplicate requests within 5 seconds
+    const now = Date.now();
+    if (now - lastFetchRef.current < 5000) {
+      console.log('Skipping duplicate request - too soon');
+      return;
+    }
+    lastFetchRef.current = now;
 
     try {
       const response = await fetch(
@@ -68,13 +80,13 @@ export function useMarketData({
       }
 
       const data = await response.json();
-      
+
       // Convert array to Map
       const quotesMap = new Map<string, MarketQuote>();
       data.quotes.forEach((quote: MarketQuote) => {
         quotesMap.set(quote.symbol, quote);
       });
-      
+
       setQuotes(quotesMap);
       setStats(data.stats);
       setError(null);
@@ -86,104 +98,85 @@ export function useMarketData({
     }
   }, [symbols]);
 
-  // Smart polling based on market hours
-  const getSmartPollInterval = useCallback(() => {
-    const now = new Date();
-    const hour = now.getHours();
-    const day = now.getDay();
-    
-    // Market hours (Mon-Fri, 9:30 AM - 4:00 PM ET)
-    const isMarketHours = 
-      day >= 1 && day <= 5 && 
-      ((hour === 9 && now.getMinutes() >= 30) || (hour > 9 && hour < 16));
-    
-    // Pre-market and after-hours (4:00 AM - 9:30 AM, 4:00 PM - 8:00 PM ET)
-    const isExtendedHours = 
-      day >= 1 && day <= 5 && 
-      ((hour >= 4 && hour < 9) || (hour === 9 && now.getMinutes() < 30) ||
-       (hour >= 16 && hour < 20));
-    
-    if (isMarketHours) {
-      return Math.min(pollInterval, 10000); // Max 10s during market hours
-    } else if (isExtendedHours) {
-      return Math.min(pollInterval * 2, 30000); // Max 30s during extended hours
-    } else {
-      return Math.min(pollInterval * 6, 60000); // Max 60s when market closed
-    }
-  }, [pollInterval]);
-
   // Handle tab visibility
   useEffect(() => {
     const handleVisibilityChange = () => {
       isVisibleRef.current = !document.hidden;
-      
+
       if (isVisibleRef.current && enabled) {
-        // Tab became visible, refresh immediately
-        fetchQuotes();
+        // Tab became visible, check if we should refresh
+        const timeSinceLastFetch = Date.now() - lastFetchRef.current;
+        if (timeSinceLastFetch > 60000) {
+          // If more than 1 minute since last fetch, refresh
+          fetchQuotes();
+        }
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [fetchQuotes, enabled]);
 
-  // Setup polling
+  // Setup synchronized updates
   useEffect(() => {
     if (!enabled) {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
       return;
     }
 
     // Initial fetch
     fetchQuotes();
 
-    // Setup polling interval
-    const poll = () => {
-      if (isVisibleRef.current) {
-        fetchQuotes();
-      }
-    };
+    if (syncUpdates) {
+      // Subscribe to synchronized updates
+      const unsubscribe = marketSyncManager.subscribe(subscriptionId.current, () => {
+        // Only fetch if tab is visible
+        if (isVisibleRef.current) {
+          console.log('Synchronized market update triggered');
+          fetchQuotes();
+        }
+      });
 
-    intervalRef.current = setInterval(poll, getSmartPollInterval());
+      // Update countdown timer
+      const countdownInterval = setInterval(() => {
+        setNextUpdateIn(marketSyncManager.getSecondsUntilNextSync());
+      }, 1000);
 
-    // Adjust interval based on market hours
-    const adjustInterval = setInterval(() => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = setInterval(poll, getSmartPollInterval());
-      }
-    }, 60000); // Check every minute if we need to adjust
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      clearInterval(adjustInterval);
-    };
-  }, [symbols, enabled, fetchQuotes, getSmartPollInterval]);
+      return () => {
+        unsubscribe();
+        clearInterval(countdownInterval);
+      };
+    }
+    // If sync updates are disabled, don't setup any polling
+    // User must manually call refresh()
+  }, [symbols.join(','), enabled, syncUpdates, fetchQuotes]);
 
   return {
     quotes,
     loading,
     error,
     refresh: fetchQuotes,
-    stats
+    stats,
+    nextUpdateIn: syncUpdates ? nextUpdateIn : undefined
   };
 }
 
 /**
- * Hook for a single quote
+ * Hook for a single quote with synchronized updates
  */
-export function useMarketQuote(symbol: string, options?: Omit<UseMarketDataOptions, 'symbols'>) {
-  const { quotes, loading, error, refresh, stats } = useMarketData({
+export function useMarketQuote(
+  symbol: string,
+  options?: {
+    enabled?: boolean;
+    syncUpdates?: boolean;
+  }
+) {
+  const { quotes, loading, error, refresh, stats, nextUpdateIn } = useMarketData({
     symbols: symbol ? [symbol] : [],
-    ...options
+    enabled: options?.enabled ?? true,
+    syncUpdates: options?.syncUpdates ?? true
   });
 
   return {
@@ -191,7 +184,8 @@ export function useMarketQuote(symbol: string, options?: Omit<UseMarketDataOptio
     loading,
     error,
     refresh,
-    stats
+    stats,
+    nextUpdateIn
   };
 }
 

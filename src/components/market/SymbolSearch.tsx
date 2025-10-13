@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, Clock, X } from 'lucide-react';
-import { searchTickers, getPopularTickers, TickerSymbol } from '@/data/ticker-database';
+import { searchSymbols, Symbol } from '@/data/symbol-database';
 import { useRouter } from 'next/navigation';
 
 // Clean company name helper
@@ -10,22 +10,22 @@ function cleanCompanyName(name: string): string {
   return name.replace(/\.(com|org|net|io|co|ai)$/i, '').trim();
 }
 
-interface TickerSearchProps {
-  onSelectTicker?: (ticker: TickerSymbol) => void;
+interface SymbolSearchProps {
+  onSelectSymbol?: (symbol: Symbol) => void;
   className?: string;
   placeholder?: string;
 }
 
-export function TickerSearch({
-  onSelectTicker,
+export function SymbolSearch({
+  onSelectSymbol,
   className,
   placeholder = "Search stocks, crypto (Binance USD pairs)..."
-}: TickerSearchProps) {
+}: SymbolSearchProps) {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [results, setResults] = useState<TickerSymbol[]>([]);
+  const [results, setResults] = useState<Symbol[]>([]);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   
   const searchRef = useRef<HTMLDivElement>(null);
@@ -33,7 +33,7 @@ export function TickerSearch({
 
   // Load recent searches from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('hero_recent_tickers');
+    const saved = localStorage.getItem('hero_recent_symbols');
     if (saved) {
       try {
         const searches = JSON.parse(saved) as string[];
@@ -41,7 +41,7 @@ export function TickerSearch({
         const uniqueSearches = [...new Set(searches)];
         setRecentSearches(uniqueSearches);
         // Update localStorage to clean up any duplicates
-        localStorage.setItem('hero_recent_tickers', JSON.stringify(uniqueSearches));
+        localStorage.setItem('hero_recent_symbols', JSON.stringify(uniqueSearches));
       } catch {}
     }
   }, []);
@@ -49,47 +49,46 @@ export function TickerSearch({
   // Handle search
   useEffect(() => {
     if (query.length > 0) {
-      const searchResults = searchTickers(query, 8);
+      const searchResults = searchSymbols(query, 8);
       setResults(searchResults);
       setSelectedIndex(0);
     } else {
-      // Show popular/recent when no query
+      // Show recent when no query
       if (recentSearches.length > 0) {
-        const recentTickers = recentSearches
-          .slice(0, 4)
-          .map(symbol => searchTickers(symbol, 1)[0])
+        const recentSymbols = recentSearches
+          .slice(0, 8)
+          .map(symbol => searchSymbols(symbol, 1)[0])
           .filter(Boolean);
-        const popular = getPopularTickers(4);
-        // Filter out duplicates between recent and popular
-        const popularFiltered = popular.filter(p => !recentTickers.some(r => r.symbol === p.symbol));
-        setResults([...recentTickers, ...popularFiltered].slice(0, 8));
+        setResults(recentSymbols);
       } else {
-        setResults(getPopularTickers(8));
+        // Show common symbols when no recent searches
+        const defaultSymbols = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'BTC', 'ETH', 'SPY'];
+        setResults(defaultSymbols.map(s => searchSymbols(s, 1)[0]).filter(Boolean));
       }
       setSelectedIndex(0);
     }
   }, [query, recentSearches]);
 
-  // Handle ticker selection - Navigate directly to ticker page
-  const handleSelect = useCallback(async (ticker: TickerSymbol) => {
+  // Handle symbol selection - Navigate directly to symbol page
+  const handleSelect = useCallback(async (symbol: Symbol) => {
     // Remove any existing instance of this symbol from recent searches
-    const filtered = recentSearches.filter(s => s !== ticker.symbol);
+    const filtered = recentSearches.filter(s => s !== symbol.symbol);
     // Add the new search to the front
-    const updated = [ticker.symbol, ...filtered].slice(0, 10);
+    const updated = [symbol.symbol, ...filtered].slice(0, 10);
     setRecentSearches(updated);
-    localStorage.setItem('hero_recent_tickers', JSON.stringify(updated));
-    
+    localStorage.setItem('hero_recent_symbols', JSON.stringify(updated));
+
     // Clear search
     setQuery('');
     setIsOpen(false);
-    
-    // Navigate directly to ticker page
-    if (onSelectTicker) {
-      onSelectTicker(ticker);
+
+    // Navigate directly to symbol page
+    if (onSelectSymbol) {
+      onSelectSymbol(symbol);
     } else {
-      router.push(`/ticker/${ticker.symbol}`);
+      router.push(`/symbol/${encodeURIComponent(symbol.symbol)}`);
     }
-  }, [recentSearches, onSelectTicker, router]);
+  }, [recentSearches, onSelectSymbol, router]);
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -180,21 +179,21 @@ export function TickerSearch({
                   {recentSearches.length > 0 ? (
                     <>
                       <Clock className="h-3 w-3" />
-                      Recent & Popular
+                      Recent Symbols
                     </>
                   ) : (
                     <>
-                      Popular Tickers
+                      Common Symbols
                     </>
                   )}
                 </div>
               </div>
             )}
 
-            {results.map((ticker, index) => (
+            {results.map((symbol, index) => (
               <button
-                key={ticker.symbol}
-                onClick={() => handleSelect(ticker)}
+                key={symbol.symbol}
+                onClick={() => handleSelect(symbol)}
                 onMouseEnter={() => setSelectedIndex(index)}
                 className={`w-full px-4 py-3 flex items-center justify-between transition-colors ${
                   selectedIndex === index ? 'bg-gray-50' : 'hover:bg-gray-50'
@@ -203,16 +202,16 @@ export function TickerSearch({
                 <div className="flex items-center gap-3">
                   <div className="text-left">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-900 font-manrope">{ticker.symbol}</span>
+                      <span className="font-semibold text-gray-900 font-manrope">{symbol.symbol}</span>
                     </div>
                     <div className="text-sm text-gray-500 truncate max-w-[300px] font-inter">
-                      {cleanCompanyName(ticker.name)}
+                      {cleanCompanyName(symbol.name)}
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Show if it's a recent search */}
-                {recentSearches.includes(ticker.symbol) && (
+                {recentSearches.includes(symbol.symbol) && (
                   <Clock className="h-3 w-3 text-gray-400" />
                 )}
               </button>

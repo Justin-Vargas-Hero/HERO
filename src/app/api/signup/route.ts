@@ -7,7 +7,7 @@ const ses = new SESv2Client({ region: process.env.REGION || process.env.AWS_REGI
 
 export async function POST(req: Request) {
     const body = await req.json();
-    const { firstName, lastName, username, email, password, confirmPassword, dobMonth, dobDay, dobYear, token } = body;
+    const { firstName, lastName, username, email, password, confirmPassword, dobMonth, dobDay, dobYear, timezone, token } = body;
 
     const verify = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
         method: "POST",
@@ -53,6 +53,7 @@ export async function POST(req: Request) {
             dobMonth: Number(dobMonth),
             dobDay: Number(dobDay),
             dobYear: Number(dobYear),
+            timezone: timezone || 'UTC',  // Default to UTC if not provided
         },
     });
 

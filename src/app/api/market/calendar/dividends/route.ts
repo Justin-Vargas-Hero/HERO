@@ -14,16 +14,18 @@ export async function GET(request: Request) {
     }
 
     const data = await response.json();
-    
-    // Transform to our format
-    const events = data.dividends?.map((item: any) => ({
-      symbol: item.symbol,
-      name: item.name,
-      date: item.ex_dividend_date,
-      amount: item.dividend_amount,
-      yield: item.dividend_yield,
-      payment_date: item.payment_date
-    })) || [];
+
+    // TwelveData returns dividends as a direct array
+    const events = Array.isArray(data)
+      ? data.map((item: any) => ({
+          symbol: item.symbol,
+          name: item.name || item.symbol, // Name might not be included
+          date: item.ex_date || item.ex_dividend_date,
+          amount: item.amount || item.dividend_amount,
+          exchange: item.exchange,
+          mic_code: item.mic_code
+        }))
+      : [];
 
     return NextResponse.json(events);
   } catch (error) {

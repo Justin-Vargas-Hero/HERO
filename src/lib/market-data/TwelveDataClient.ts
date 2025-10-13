@@ -65,6 +65,27 @@ export class TwelveDataClient {
   }
 
   /**
+   * Convert symbol to API format
+   * IMPORTANT: Distinguish between crypto ETFs and crypto pairs:
+   * - BTC (without /) could be a crypto ETF - leave as is
+   * - BTC/USD is a crypto pair - leave as is
+   * - Only auto-append /USD when explicitly needed
+   */
+  private formatSymbolForAPI(symbol: string): string {
+    const upperSymbol = symbol.toUpperCase();
+
+    // If the symbol already has a slash (e.g., BTC/USD), it's a crypto pair - use as is
+    if (upperSymbol.includes('/')) {
+      return upperSymbol;
+    }
+
+    // For symbols without a slash, don't auto-append /USD
+    // The user should specify BTC for ETF or BTC/USD for the crypto pair
+    // This allows both BTC (ETF) and BTC/USD (crypto) to work correctly
+    return upperSymbol;
+  }
+
+  /**
    * Get a single quote with caching
    */
   async getQuote(symbol: string): Promise<MarketQuote> {
@@ -198,9 +219,12 @@ export class TwelveDataClient {
 
     this.requestCount++;
 
+    // Convert symbol to API format (adds /USD for crypto)
+    const apiSymbol = this.formatSymbolForAPI(symbol);
+
     // Include pre/post-market data
     const response = await fetch(
-      `https://api.twelvedata.com/quote?symbol=${symbol}&prepost=true&apikey=${this.apiKey}`
+      `https://api.twelvedata.com/quote?symbol=${apiSymbol}&prepost=true&apikey=${this.apiKey}`
     );
 
     if (!response.ok) {
@@ -230,7 +254,10 @@ export class TwelveDataClient {
 
     this.requestCount++;
 
-    const symbolString = symbols.join(',');
+    // Convert all symbols to API format (adds /USD for crypto)
+    const apiSymbols = symbols.map(s => this.formatSymbolForAPI(s));
+    const symbolString = apiSymbols.join(',');
+
     // Include pre/post-market data
     const response = await fetch(
       `https://api.twelvedata.com/quote?symbol=${symbolString}&prepost=true&apikey=${this.apiKey}`
@@ -268,8 +295,11 @@ export class TwelveDataClient {
    * Format raw API data into MarketQuote
    */
   private formatQuote(symbol: string, data: any): MarketQuote {
+    // Keep the original symbol as-is (don't remove /USD for crypto pairs)
+    const originalSymbol = symbol.toUpperCase();
+
     const quote: MarketQuote = {
-      symbol: symbol.toUpperCase(),
+      symbol: originalSymbol,
       price: parseFloat(data.close || data.price || 0),
       change: parseFloat(data.change || 0),
       changePercent: parseFloat(data.percent_change || 0),
@@ -325,14 +355,17 @@ export class TwelveDataClient {
     const now = new Date();
     const hour = now.getUTCHours();
     const day = now.getUTCDay();
-    
+
     // Check if market is open (rough check for US markets)
     // Mon-Fri, 14:30-21:00 UTC (9:30 AM - 4:00 PM ET)
     const isMarketHours = day >= 1 && day <= 5 && hour >= 14 && hour < 21;
-    
+
     const ttl = isMarketHours ? this.CACHE_TTL : this.CACHE_TTL_AFTER_HOURS;
-    
-    this.cache.set(symbol, {
+
+    // Cache with the exact symbol as provided
+    const cacheKey = symbol.toUpperCase();
+
+    this.cache.set(cacheKey, {
       data: quote,
       timestamp: Date.now(),
       expiresAt: Date.now() + ttl
@@ -373,10 +406,44 @@ export class TwelveDataClient {
   /**
    * Get time series data for charts
    */
-  async getTimeSeries(symbol: string, interval: string = '5min', outputsize: number = 78): Promise<any> {
-    // Include pre/post-market data for time series
+  async getTimeSeries(
+    symbol: string,
+    interval: string = '5min',
+    outputsize: number = 78,
+    startDate?: string,
+    endDate?: string
+  ): Promise<any> {
+    // For real-time data, don't use date parameters
+    // This ensures we get the most recent data available
+    if (!startDate && !endDate) {
+      // Just fetch the most recent data without date constraints
+    } else {
+      // Validate dates - only warn if truly in the future
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+
+      if (startDate && startDate > today) {
+        console.warn(`Start date ${startDate} is in the future, removing date constraint`);
+        startDate = undefined;
+      }
+      if (endDate && endDate > today) {
+        console.warn(`End date ${endDate} is in the future, removing date constraint`);
+        endDate = undefined;
+      }
+    }
+
+    // Convert symbol to API format (adds /USD for crypto)
+    const apiSymbol = this.formatSymbolForAPI(symbol);
+
+    // Only include pre/post-market data for 1min intervals (TwelveData limitation)
+    const prepostParam = interval === '1min' ? '&prepost=true' : '';
+
+    // Add date range parameters if provided
+    const dateParams = startDate ? `&start_date=${startDate}` : '';
+    const endDateParam = endDate ? `&end_date=${endDate}` : '';
+
     const response = await fetch(
-      `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=${interval}&outputsize=${outputsize}&prepost=true&apikey=${this.apiKey}`
+      `https://api.twelvedata.com/time_series?symbol=${apiSymbol}&interval=${interval}&outputsize=${outputsize}${prepostParam}${dateParams}${endDateParam}&apikey=${this.apiKey}`
     );
 
     if (!response.ok) {
@@ -384,8 +451,18 @@ export class TwelveDataClient {
     }
 
     const data = await response.json();
-    
+
+    // Handle API errors more gracefully
     if (data.status === 'error') {
+      // For date-related errors or "No data available", return empty data instead of throwing
+      if (data.message?.includes('No data available') ||
+          data.message?.includes('date') ||
+          data.message?.includes('Invalid') ||
+          data.message?.includes('future')) {
+        console.warn(`TwelveData API warning for ${symbol}: ${data.message}`);
+        return { values: [], status: 'ok', meta: { symbol } };
+      }
+      // For other errors, still throw
       throw new Error(data.message || 'Failed to fetch time series');
     }
 

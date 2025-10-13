@@ -1,9 +1,7 @@
 import { type NextAuthOptions, SessionStrategy } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { PrismaClient } from "@prisma/client";
 import { compare } from "bcryptjs";
-
-const prisma = new PrismaClient();
+import { prisma } from "./prisma";
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -44,6 +42,7 @@ export const authOptions: NextAuthOptions = {
                     email: user.email,
                     username: user.username,
                     profilePicture: user.profilePicture,
+                    timezone: user.timezone || 'UTC',
                 };
             },
         }),
@@ -66,6 +65,7 @@ export const authOptions: NextAuthOptions = {
                         profilePicture: true,
                         firstName: true,
                         lastName: true,
+                        timezone: true,
                     }
                 });
 
@@ -74,6 +74,7 @@ export const authOptions: NextAuthOptions = {
                     token.username = dbUser.username;
                     token.profilePicture = dbUser.profilePicture;
                     token.name = `${dbUser.firstName} ${dbUser.lastName}`;
+                    token.timezone = dbUser.timezone || 'UTC';
                 }
             }
 
@@ -86,6 +87,7 @@ export const authOptions: NextAuthOptions = {
                 session.user.username = token.username as string;
                 session.user.profilePicture = token.profilePicture as string;
                 session.user.name = token.name as string;
+                session.user.timezone = token.timezone as string || 'UTC';
             }
             return session;
         }

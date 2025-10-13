@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import AuthModal from "@/components/AuthModal";
 import UserDropdown from "@/components/UserDropdown";
-import { TickerSearch } from "@/components/market/TickerSearch";
+import { SymbolSearch } from "@/components/market/SymbolSearch";
 import { LivePing } from "@/components/LivePing";
 import { isMarketOpen, getMarketStatus } from "@/lib/market-utils";
 
@@ -66,10 +66,10 @@ export default function Topbar() {
                     </Link>
                 </div>
 
-                {/* Center search - Now using TickerSearch */}
+                {/* Center search - Now using SymbolSearch */}
                 <div className="flex-1 flex justify-center px-4">
                     <div className="w-full max-w-[560px]">
-                        <TickerSearch
+                        <SymbolSearch
                             placeholder="Search stocks, crypto (200+ Binance USD pairs), ETFs..."
                             className="w-full"
                         />

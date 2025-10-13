@@ -14,14 +14,18 @@ interface TradingViewChartProps {
   height?: number;
   realTimePrice?: number;
   data?: any[];
+  interval?: string; // Added interval prop
+  timezone?: string; // User's preferred timezone
 }
 
-export default function TradingViewChart({ 
-  symbol, 
+export default function TradingViewChart({
+  symbol,
   type = 'line',
   height = 400,
   realTimePrice,
-  data 
+  data,
+  interval = '5min',
+  timezone = 'UTC'
 }: TradingViewChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -60,42 +64,15 @@ export default function TradingViewChart({
 
     chartRef.current = chart;
 
-    // Use provided data or generate sample data
-    let chartData = data;
-    
-    if (!chartData || chartData.length === 0) {
-      // Generate sample data only if no data provided
-      chartData = [];
-      const basePrice = 100 + Math.random() * 50;
-      const currentDate = Math.floor(Date.now() / 1000); // Current Unix timestamp
-      
-      for (let i = 0; i < 100; i++) {
-        // Go back in 5-minute intervals
-        const time = currentDate - (100 - i) * 300; // 300 seconds = 5 minutes
-        
-        const randomWalk = (Math.random() - 0.5) * 4;
-        const price = basePrice + randomWalk * i * 0.02 + Math.sin(i * 0.1) * 5;
-        
-        if (type === 'candle') {
-          const open = price + (Math.random() - 0.5) * 2;
-          const close = price + (Math.random() - 0.5) * 2;
-          const high = Math.max(open, close) + Math.random() * 2;
-          const low = Math.min(open, close) - Math.random() * 2;
-          
-          chartData.push({
-            time: time,
-            open: open,
-            high: high,
-            low: low,
-            close: close,
-          });
-        } else {
-          chartData.push({
-            time: time,
-            value: price,
-          });
-        }
-      }
+    // ONLY use provided data - NEVER generate random data
+    const chartData = data || [];
+
+    // If no data, show empty chart
+    if (chartData.length === 0) {
+      console.warn(`No data available for ${symbol} - showing empty chart`);
+      // Remove the chart instance since we have no data
+      chart.remove();
+      return;
     }
 
     // Ensure data is sorted by time
@@ -150,34 +127,51 @@ export default function TradingViewChart({
     };
   }, [type, height, data]);
 
-  // Update with real-time price
+  // Update with real-time price for ALL intervals
   useEffect(() => {
     if (realTimePrice && seriesRef.current && data && data.length > 0) {
       const lastDataPoint = data[data.length - 1];
-      const now = Math.floor(Date.now() / 1000);
-      
-      // Only update if enough time has passed since last data point
-      if (now - lastDataPoint.time > 60) {
-        if (type === 'candle') {
-          seriesRef.current.update({
-            time: now,
-            open: realTimePrice,
-            high: realTimePrice,
-            low: realTimePrice,
-            close: realTimePrice,
-          });
-        } else {
-          seriesRef.current.update({
-            time: now,
-            value: realTimePrice,
-          });
-        }
+
+      // Always update the current candle with real-time price
+      // This applies to ALL intervals - 1min, 5min, 1hour, 1day, 1week, etc.
+      // The real-time price updates the CURRENT candle, not create new candles
+
+      if (type === 'candle') {
+        // Update the current candle's high/low/close with the real-time price
+        seriesRef.current.update({
+          time: lastDataPoint.time,
+          open: lastDataPoint.open,
+          high: Math.max(lastDataPoint.high, realTimePrice),
+          low: Math.min(lastDataPoint.low, realTimePrice),
+          close: realTimePrice,
+        });
+      } else {
+        // For line/area charts, just update the last value
+        seriesRef.current.update({
+          time: lastDataPoint.time,
+          value: realTimePrice,
+        });
       }
     }
-  }, [realTimePrice, type, data]);
+  }, [realTimePrice, type, data, interval]);
+
+  // Show loading message if no data
+  if (!data || data.length === 0) {
+    return (
+      <div
+        className="w-full flex items-center justify-center text-gray-500"
+        style={{ minHeight: height }}
+      >
+        <div className="text-center">
+          <p>Loading chart data...</p>
+          <p className="text-sm mt-2">Data will appear when market is active</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div 
+    <div
       ref={chartContainerRef}
       className="w-full"
       style={{ minHeight: height }}

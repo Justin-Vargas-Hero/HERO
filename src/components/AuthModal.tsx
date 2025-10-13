@@ -4,6 +4,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useMemo, useState, memo, useCallback } from "react";
 import { signIn } from "next-auth/react";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import { TIMEZONES, getUserTimezone } from "@/lib/timezones";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const USERNAME_RE = /^[a-zA-Z0-9._-]{3,20}$/;
@@ -65,6 +66,7 @@ export default function AuthModal({
     const [dobMonth, setDobMonth] = useState<number | "">("");
     const [dobDay, setDobDay] = useState<number | "">("");
     const [dobYear, setDobYear] = useState<number | "">("");
+    const [timezone, setTimezone] = useState(getUserTimezone()); // Auto-detect user's timezone
     const [captchaToken, setCaptchaToken] = useState("");
 
     // touched states for validation
@@ -125,6 +127,7 @@ export default function AuthModal({
             setDobMonth("");
             setDobDay("");
             setDobYear("");
+            setTimezone(getUserTimezone()); // Reset to detected timezone
             setCaptchaToken("");
         }
         setError("");
@@ -248,6 +251,7 @@ export default function AuthModal({
                         dobMonth,
                         dobDay,
                         dobYear,
+                        timezone,
                         token: captchaToken,
                     }),
                 });
@@ -555,6 +559,29 @@ export default function AuthModal({
                                                         Must be 13+ years old
                                                     </TooltipRight>
                                                 </div>
+
+                                                {/* Timezone Selection */}
+                                                <div>
+                                                    <label className="text-sm text-gray-600 font-medium">
+                                                        Timezone (for charts display)
+                                                    </label>
+                                                    <select
+                                                        value={timezone}
+                                                        onChange={(e) => setTimezone(e.target.value)}
+                                                        required
+                                                        className={`${fieldClass(false)} text-gray-900 mt-2`}
+                                                    >
+                                                        {TIMEZONES.map((tz) => (
+                                                            <option key={tz.value} value={tz.value}>
+                                                                {tz.label} ({tz.offset})
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        All market data will be displayed in this timezone
+                                                    </p>
+                                                </div>
+
                                                 <TurnstileWidget onVerify={setCaptchaToken} />
                                             </>
                                         )}

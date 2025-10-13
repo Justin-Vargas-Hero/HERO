@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTwelveDataClient } from '@/lib/market-data/TwelveDataClient';
-import { serverCache } from '@/lib/market-data/server-cache';
+import { unifiedCache, CacheTier, CacheKeys } from '@/lib/cache/unified-cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,113 +11,75 @@ export async function GET(request: NextRequest) {
     // Single symbol request
     if (symbol) {
       const upperSymbol = symbol.trim().toUpperCase();
-      const cacheKey = `quote:${upperSymbol}`;
-      
-      // Check cache first
-      const cached = serverCache.get(cacheKey);
-      if (cached) {
-        return NextResponse.json({ 
-          quote: cached,
-          cached: true,
-          source: 'server-cache'
-        });
-      }
-      
-      // Check if request is already pending
-      if (serverCache.isPending(cacheKey)) {
-        try {
-          const data = await serverCache.addPending(cacheKey);
-          return NextResponse.json({ 
-            quote: data,
-            cached: true,
-            source: 'pending-request'
-          });
-        } catch (error) {
-          return NextResponse.json({ error: 'Failed to fetch quote' }, { status: 500 });
-        }
-      }
-      
-      // Fetch from API
-      try {
-        const client = getTwelveDataClient();
-        const quote = await client.getQuote(upperSymbol);
-        
-        // Cache the result
-        serverCache.set(cacheKey, quote, 'quote');
-        
-        // Resolve any pending requests
-        serverCache.resolvePending(cacheKey, quote);
-        
-        return NextResponse.json({ 
-          quote,
-          cached: false,
-          source: 'api'
-        });
-      } catch (error) {
-        serverCache.rejectPending(cacheKey, error);
-        throw error;
-      } finally {
-        serverCache.clearPending(cacheKey);
-      }
+
+      // Use unified cache with real-time tier for quotes
+      const quote = await unifiedCache.getOrFetch(
+        CacheKeys.quote(upperSymbol),
+        async () => {
+          const client = getTwelveDataClient();
+          return await client.getQuote(upperSymbol);
+        },
+        { tier: CacheTier.REALTIME }
+      );
+
+      return NextResponse.json({
+        quote,
+        cached: false,
+        source: 'unified-cache'
+      });
 
     }
     
     // Multiple symbols request (batch)
     if (symbols) {
       const symbolList = symbols.split(',').map(s => s.trim().toUpperCase()).filter(s => s);
-      
+
       if (symbolList.length > 50) {
         return NextResponse.json({ error: 'Maximum 50 symbols per request' }, { status: 400 });
       }
-      
-      // Check cache for all symbols
-      const cachedQuotes = serverCache.getBatchQuotes(symbolList);
-      const missingSymbols = serverCache.getMissingSymbols(symbolList);
-      
-      // If all are cached, return immediately
-      if (missingSymbols.length === 0) {
-        const quotesArray = Array.from(cachedQuotes.entries()).map(([symbol, quote]) => ({
-          symbol,
-          ...quote
-        }));
-        
-        return NextResponse.json({
-          quotes: quotesArray,
-          cached: true,
-          source: 'server-cache',
-          timestamp: Date.now()
-        });
-      }
-      
+
+      // Get cached quotes
+      const cacheKeys = symbolList.map(s => CacheKeys.quote(s));
+      const cachedQuotes = await unifiedCache.getBatch(cacheKeys);
+      const missingKeys = await unifiedCache.getMissingKeys(cacheKeys);
+
+      // Map back to symbols
+      const missingSymbols = missingKeys.map(key => key.replace('quote:', ''));
+
       // Fetch missing symbols
       if (missingSymbols.length > 0) {
         try {
           const client = getTwelveDataClient();
           const freshQuotes = await client.getBatchQuotes(missingSymbols);
-          
+
           // Cache fresh quotes
-          serverCache.setBatchQuotes(freshQuotes);
-          
-          // Merge cached and fresh quotes
-          freshQuotes.forEach((quote, symbol) => {
-            cachedQuotes.set(symbol, quote);
-          });
+          for (const [symbol, quote] of freshQuotes.entries()) {
+            await unifiedCache.set(
+              CacheKeys.quote(symbol),
+              quote,
+              { tier: CacheTier.REALTIME }
+            );
+            cachedQuotes.set(CacheKeys.quote(symbol), quote);
+          }
         } catch (error) {
           console.error('Failed to fetch missing quotes:', error);
         }
       }
-      
-      const quotesArray = Array.from(cachedQuotes.entries()).map(([symbol, quote]) => ({
-        symbol,
-        ...quote
-      }));
-      
+
+      // Convert back to array format
+      const quotesArray = symbolList
+        .map(symbol => {
+          const quote = cachedQuotes.get(CacheKeys.quote(symbol));
+          return quote ? { symbol, ...quote } : null;
+        })
+        .filter(q => q !== null);
+
       return NextResponse.json({
         quotes: quotesArray,
         cached: missingSymbols.length === 0,
-        source: missingSymbols.length === 0 ? 'server-cache' : 'mixed',
+        source: 'unified-cache',
         timestamp: Date.now(),
-        stats: serverCache.getStats()
+        stats: unifiedCache.getStats()
       });
     }
     

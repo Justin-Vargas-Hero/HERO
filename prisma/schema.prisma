@@ -20,6 +20,7 @@ model User {
   dobMonth      Int
   dobDay        Int
   dobYear       Int
+  timezone      String    @default("UTC") // User's preferred timezone
   emailVerified DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

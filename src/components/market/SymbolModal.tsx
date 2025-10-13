@@ -2,45 +2,45 @@
 
 import { useEffect, useState } from 'react';
 import { X, TrendingUp, TrendingDown, Activity, DollarSign, BarChart, Info, Star, ExternalLink } from 'lucide-react';
-import { TickerSymbol } from '@/data/ticker-database';
+import { Symbol } from '@/data/symbol-database';
 import { useMarketQuote } from '@/hooks/useMarketData';
 import { formatPrice, formatVolume, getPriceChangeColor } from '@/hooks/useMarketData';
 import Link from 'next/link';
 
-interface TickerModalProps {
-  ticker: TickerSymbol;
+interface SymbolModalProps {
+  symbol: Symbol;
   quote: any;
   open: boolean;
   onClose: () => void;
 }
 
-export default function TickerModal({ ticker, quote: initialQuote, open, onClose }: TickerModalProps) {
+export default function SymbolModal({ symbol, quote: initialQuote, open, onClose }: SymbolModalProps) {
   const [isWatchlist, setIsWatchlist] = useState(false);
   
-  // Fetch real-time quote with polling
-  const { quote, loading, error } = useMarketQuote(ticker.symbol, {
+  // Fetch real-time quote with synchronized updates at :00 seconds
+  const { quote, loading, error, nextUpdateIn } = useMarketQuote(symbol.symbol, {
     enabled: open,
-    pollInterval: 10000 // Update every 10 seconds
+    syncUpdates: true // Update only at :00 seconds
   });
 
   // Use initial quote if real-time not loaded yet
   const displayQuote = quote || initialQuote;
 
-  // Check if ticker is in watchlist
+  // Check if symbol is in watchlist
   useEffect(() => {
     const watchlist = JSON.parse(localStorage.getItem('hero_watchlist') || '[]');
-    setIsWatchlist(watchlist.includes(ticker.symbol));
-  }, [ticker.symbol]);
+    setIsWatchlist(watchlist.includes(symbol.symbol));
+  }, [symbol.symbol]);
 
   // Toggle watchlist
   const toggleWatchlist = () => {
     const watchlist = JSON.parse(localStorage.getItem('hero_watchlist') || '[]');
     if (isWatchlist) {
-      const updated = watchlist.filter((s: string) => s !== ticker.symbol);
+      const updated = watchlist.filter((s: string) => s !== symbol.symbol);
       localStorage.setItem('hero_watchlist', JSON.stringify(updated));
       setIsWatchlist(false);
     } else {
-      const updated = [...watchlist, ticker.symbol];
+      const updated = [...watchlist, symbol.symbol];
       localStorage.setItem('hero_watchlist', JSON.stringify(updated));
       setIsWatchlist(true);
     }
@@ -75,18 +75,18 @@ export default function TickerModal({ ticker, quote: initialQuote, open, onClose
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-3xl font-bold">{ticker.symbol}</h2>
+                  <h2 className="text-3xl font-bold">{symbol.symbol}</h2>
                   <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                    ticker.exchange === 'CRYPTO' 
+                    symbol.exchange === 'CRYPTO'
                       ? 'bg-orange-500/10 text-orange-500'
-                      : ticker.exchange === 'NASDAQ'
+                      : symbol.exchange === 'NASDAQ'
                       ? 'bg-purple-500/10 text-purple-500'
                       : 'bg-blue-500/10 text-blue-500'
                   }`}>
-                    {ticker.exchange}
+                    {symbol.exchange}
                   </span>
                 </div>
-                <p className="text-muted-foreground">{ticker.name}</p>
+                <p className="text-muted-foreground">{symbol.name}</p>
               </div>
 
               <div className="flex gap-2">
@@ -101,7 +101,7 @@ export default function TickerModal({ ticker, quote: initialQuote, open, onClose
                   <Star className="h-5 w-5" fill={isWatchlist ? 'currentColor' : 'none'} />
                 </button>
                 <Link
-                  href={`/ticker/${ticker.symbol}`}
+                  href={`/symbol/${encodeURIComponent(symbol.symbol)}`}
                   className="p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
                 >
                   <ExternalLink className="h-5 w-5" />
@@ -209,7 +209,7 @@ export default function TickerModal({ ticker, quote: initialQuote, open, onClose
                   <h3 className="font-semibold mb-3">Quick Actions</h3>
                   <div className="space-y-2">
                     <Link
-                      href={`/ticker/${ticker.symbol}`}
+                      href={`/symbol/${encodeURIComponent(symbol.symbol)}`}
                       className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-center block text-sm font-medium"
                     >
                       View Full Chart
@@ -227,6 +227,9 @@ export default function TickerModal({ ticker, quote: initialQuote, open, onClose
               {/* Timestamp */}
               <div className="mt-4 text-center text-xs text-muted-foreground">
                 Last updated: {new Date(displayQuote.timestamp).toLocaleString()}
+                {nextUpdateIn !== undefined && nextUpdateIn > 0 && (
+                  <span className="ml-2">• Next update in {nextUpdateIn}s</span>
+                )}
                 {loading && <span className="ml-2">(Refreshing...)</span>}
               </div>
             </>

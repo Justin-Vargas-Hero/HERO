@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## CRITICAL RULES - MUST FOLLOW
+
+1. **NEVER USE MOCK DATA** - This is a real trading/financial application. All data must be real and from legitimate APIs.
+2. **NO FAKE/PLACEHOLDER DATA** - If an API doesn't provide certain data, handle it gracefully with empty states, not fake data.
+3. **ACCURACY IS PARAMOUNT** - Financial data must be 100% accurate. Never approximate or generate financial information.
+4. **WHEN API DOESN'T EXIST** - If a required API endpoint doesn't exist, inform the user and suggest alternatives, don't fake it.
+
 ## Project Overview
 
 HERO is a trading forum and market data platform built with Next.js 15, React 19, TypeScript, Prisma, and PostgreSQL. The application provides real-time market data, user authentication, and a social trading community.
@@ -129,7 +136,8 @@ Required variables:
 - `DATABASE_URL` - PostgreSQL connection string
 - `NEXTAUTH_SECRET` - JWT signing secret
 - `NEXTAUTH_URL` - Application URL
-- `TWELVEDATA_API_KEY` - Market data API key
+- `TWELVEDATA_API_KEY` - Market data API key for quotes and historical data
+- `STOCKNEWS_API_KEY` - StockNewsAPI key for financial news (optional but recommended)
 - `USE_S3` - "true" for S3, omit/false for local uploads
 - `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` - For S3
 - `S3_BUCKET_NAME` - S3 bucket for uploads

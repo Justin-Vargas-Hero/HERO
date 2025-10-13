@@ -2,8 +2,14 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
+  // TEMPORARILY DISABLED: Edge Runtime issue in development
+  // Only run middleware in production
+  if (process.env.NODE_ENV !== 'production') {
+    return NextResponse.next();
+  }
+
   const { pathname, hostname } = request.nextUrl;
-  
+
   // Skip middleware for API routes, static files, and auth routes
   if (
     pathname.startsWith('/api') ||
@@ -16,14 +22,14 @@ export function middleware(request: NextRequest) {
 
   // Only apply redirect logic on production domain
   const isProductionDomain = hostname === 'hero.us.org' || hostname.endsWith('.hero.us.org');
-  
+
   if (!isProductionDomain) {
     return NextResponse.next();
   }
 
   // Check if user has visited before
   const hasVisited = request.cookies.has('hero_visited');
-  
+
   // If it's the landing page, let them through
   if (pathname === '/landing') {
     // Set the cookie so they won't be redirected again
@@ -37,7 +43,7 @@ export function middleware(request: NextRequest) {
     }
     return response;
   }
-  
+
   // If first time visitor and not on landing page, redirect to landing
   if (!hasVisited && pathname !== '/landing') {
     const url = request.nextUrl.clone();
@@ -51,7 +57,7 @@ export function middleware(request: NextRequest) {
     });
     return response;
   }
-  
+
   return NextResponse.next();
 }
 

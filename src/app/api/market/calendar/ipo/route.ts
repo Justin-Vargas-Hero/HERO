@@ -14,16 +14,30 @@ export async function GET(request: Request) {
     }
 
     const data = await response.json();
-    
-    // Transform to our format
-    const events = data.ipos?.map((item: any) => ({
-      symbol: item.symbol,
-      name: item.name,
-      date: item.date,
-      exchange: item.exchange,
-      price_range: item.price_range,
-      shares: item.shares
-    })) || [];
+
+    // TwelveData returns IPOs grouped by date
+    // Structure: { "2024-01-01": [...], "2024-01-02": [...] }
+    let events = [];
+
+    if (typeof data === 'object' && !Array.isArray(data)) {
+      // Get the IPOs for the requested date
+      const dateIpos = data[date];
+
+      if (Array.isArray(dateIpos)) {
+        // Transform to our format
+        events = dateIpos.map((item: any) => ({
+          symbol: item.symbol,
+          name: item.name,
+          date: date,
+          exchange: item.exchange,
+          price_range: item.price_range_low && item.price_range_high
+            ? `$${item.price_range_low}-$${item.price_range_high}`
+            : 'TBD',
+          shares: item.shares,
+          currency: item.currency
+        }));
+      }
+    }
 
     return NextResponse.json(events);
   } catch (error) {
