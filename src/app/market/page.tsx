@@ -7,6 +7,7 @@ import { formatPrice, formatVolume } from '@/hooks/useMarketData';
 import { Watchlist } from '@/components/market/Watchlist';
 import { ScrollingTicker } from '@/components/market/ScrollingTicker';
 import { MarketNews } from '@/components/market/MarketNews';
+import { InfoTooltip } from '@/components/InfoTooltip';
 import { marketDataCache } from '@/lib/market-data/cache';
 import { marketSyncManager } from '@/lib/market-data/sync-manager';
 import { formatNumber, formatCurrency } from '@/lib/utils';
@@ -326,8 +327,9 @@ export default function MarketPage() {
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
               <div className="p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-manrope font-semibold">
+                  <h2 className="text-lg font-manrope font-semibold flex items-center">
                     Market Movers
+                    <InfoTooltip content="Track the day's top gainers, losers, and most actively traded stocks. These are the stocks making the biggest moves in today's market, helping you identify trends and opportunities." />
                   </h2>
                   <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
                     <button
@@ -433,8 +435,9 @@ export default function MarketPage() {
             {/* Today's Events */}
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
               <div className="p-5">
-                <h2 className="text-lg font-manrope font-semibold mb-4">
+                <h2 className="text-lg font-manrope font-semibold mb-4 flex items-center">
                   Today's Events
+                  <InfoTooltip content="Stay informed about important market events happening today including earnings reports, dividend announcements, and IPO listings. These events can significantly impact stock prices and market sentiment." />
                 </h2>
 
                 <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 thin-scrollbar">

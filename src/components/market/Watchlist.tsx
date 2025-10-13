@@ -6,6 +6,7 @@ import { Star } from 'lucide-react';
 import { getSymbol } from '@/data/symbol-database';
 import { marketSyncManager } from '@/lib/market-data/sync-manager';
 import { formatNumber, formatCurrency } from '@/lib/utils';
+import { InfoTooltip } from '@/components/InfoTooltip';
 
 // Clean company name helper
 function cleanCompanyName(name: string): string {
@@ -192,7 +193,10 @@ export function Watchlist() {
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
       <div className="p-4">
-        <h2 className="text-lg font-manrope font-semibold mb-3">Watchlist</h2>
+        <h2 className="text-lg font-manrope font-semibold mb-3 flex items-center">
+          Watchlist
+          <InfoTooltip content="Your personalized list of stocks to monitor. Track your favorite symbols with real-time prices and mini charts. Click the star icon on any stock page to add it to your watchlist for quick access." />
+        </h2>
         {loading && watchlistItems.length > 0 ? (
           <div className="space-y-2">
             {[...Array(Math.min(3, watchlistItems.length))].map((_, i) => (

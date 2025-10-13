@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ExternalLink, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { InfoTooltip } from '@/components/InfoTooltip';
 
 interface NewsItem {
   title: string;
@@ -62,7 +63,10 @@ export function MarketNews() {
   if (loading) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <h2 className="text-lg font-manrope font-semibold mb-4">Market News</h2>
+        <h2 className="text-lg font-manrope font-semibold mb-4 flex items-center">
+          Market News
+          <InfoTooltip content="Real-time financial news from major market sources. Stay updated on breaking news, market analysis, and company announcements that could affect your portfolio and trading decisions." />
+        </h2>
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
             <div key={i} className="animate-pulse">
@@ -78,7 +82,10 @@ export function MarketNews() {
   if (error || news.length === 0) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <h2 className="text-lg font-manrope font-semibold mb-4">Market News</h2>
+        <h2 className="text-lg font-manrope font-semibold mb-4 flex items-center">
+          Market News
+          <InfoTooltip content="Real-time financial news from major market sources. Stay updated on breaking news, market analysis, and company announcements that could affect your portfolio and trading decisions." />
+        </h2>
         <div className="text-center py-8 text-gray-500 text-sm">
           <p>{error ? 'Unable to load market news' : 'No market news available at this time'}</p>
           <p className="text-xs mt-2 text-gray-400">Check back later for updates</p>
@@ -92,6 +99,7 @@ export function MarketNews() {
       <div className="p-5 border-b border-gray-200">
         <h2 className="text-lg font-manrope font-semibold flex items-center gap-2">
           Market News
+          <InfoTooltip content="Real-time financial news from major market sources. Stay updated on breaking news, market analysis, and company announcements that could affect your portfolio and trading decisions." />
         </h2>
       </div>
 
