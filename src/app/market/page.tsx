@@ -267,8 +267,21 @@ export default function MarketPage() {
               return `${changeStr} ${percentStr}`;
             };
 
+            // Map index symbols to their tradeable equivalents
+            const tradeableSymbol =
+              index.symbol === 'S&P' ? 'SPY' :
+              index.symbol === 'NASDAQ' ? 'QQQ' :
+              index.symbol === 'DOW' ? 'DIA' :
+              index.symbol === 'BTC' ? 'BTC/USD' :
+              index.symbol === 'ETH' ? 'ETH/USD' :
+              index.symbol;
+
             return (
-              <div key={index.symbol} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+              <Link
+                key={index.symbol}
+                href={`/symbol/${encodeURIComponent(tradeableSymbol)}`}
+                className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              >
                 <div>
                   <p className="text-xs font-inter text-gray-500">{index.name}</p>
                   <p className="text-lg font-manrope font-semibold mt-1">
@@ -278,7 +291,7 @@ export default function MarketPage() {
                     {formatIndexChange(index.change, index.changePercent)}
                   </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
@@ -400,7 +413,11 @@ export default function MarketPage() {
                       </h3>
                       <div className="space-y-2">
                         {earnings.map((item, idx) => (
-                          <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                          <Link
+                            key={idx}
+                            href={`/symbol/${encodeURIComponent(item.symbol)}`}
+                            className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                          >
                             <div>
                               <p className="font-inter text-sm font-medium">{item.symbol}</p>
                               <p className="text-xs font-inter text-gray-600">{item.name}</p>
@@ -426,7 +443,7 @@ export default function MarketPage() {
                                 <p className="text-xs font-inter text-gray-500">Est: ${item.estimate}</p>
                               ) : null}
                             </div>
-                          </div>
+                          </Link>
                         ))}
                       </div>
                     </div>
@@ -440,7 +457,11 @@ export default function MarketPage() {
                       </h3>
                       <div className="space-y-2">
                         {dividends.map((item, idx) => (
-                          <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                          <Link
+                            key={idx}
+                            href={`/symbol/${encodeURIComponent(item.symbol)}`}
+                            className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                          >
                             <div>
                               <p className="font-inter text-sm font-medium">{item.symbol}</p>
                               <p className="text-xs font-inter text-gray-600">{item.name}</p>
@@ -453,7 +474,7 @@ export default function MarketPage() {
                                 <p className="text-xs font-inter text-gray-500">Yield: {item.yield}%</p>
                               )}
                             </div>
-                          </div>
+                          </Link>
                         ))}
                       </div>
                     </div>
@@ -467,7 +488,11 @@ export default function MarketPage() {
                       </h3>
                       <div className="space-y-2">
                         {ipos.map((item, idx) => (
-                          <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                          <Link
+                            key={idx}
+                            href={`/symbol/${encodeURIComponent(item.symbol)}`}
+                            className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                          >
                             <div>
                               <p className="font-inter text-sm font-medium">{item.symbol}</p>
                               <p className="text-xs font-inter text-gray-600">{item.name}</p>
@@ -480,7 +505,7 @@ export default function MarketPage() {
                                 <p className="text-xs font-inter text-gray-500">{item.exchange}</p>
                               )}
                             </div>
-                          </div>
+                          </Link>
                         ))}
                       </div>
                     </div>
