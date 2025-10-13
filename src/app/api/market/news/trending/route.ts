@@ -24,17 +24,20 @@ export async function GET() {
                 }
 
                 // Get top trending/important news
+                // Use major market tickers to get general market news
                 const params = new URLSearchParams({
                     token: apiKey,
-                    items: '10', // Get top 10 trending items
-                    section: 'general',
-                    sortby: 'rank' // Sort by importance/rank
+                    items: '3', // Trial plan limit - can only get 3 items
+                    tickers: 'AAPL,MSFT,GOOGL,AMZN,NVDA,META,TSLA,SPY,QQQ,DIA' // Major stocks and indices
+                    // Note: Trial plan is limited to 3 items per request
                 });
 
                 const response = await fetch(`https://stocknewsapi.com/api/v1?${params.toString()}`);
 
                 if (!response.ok) {
-                    console.error(`StockNewsAPI error: ${response.status}`);
+                    console.error(`StockNewsAPI error: ${response.status} - ${response.statusText}`);
+                    const errorBody = await response.text();
+                    console.error('StockNewsAPI error details:', errorBody);
                     return [];
                 }
 

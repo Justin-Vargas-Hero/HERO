@@ -81,7 +81,8 @@ export function MarketNews() {
         <h2 className="text-lg font-manrope font-semibold mb-4">Market News</h2>
         <div className="text-center py-8 text-gray-500 text-sm">
           <TrendingUp className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-          <p>Unable to load market news at this time</p>
+          <p>{error ? 'Unable to load market news' : 'No market news available at this time'}</p>
+          <p className="text-xs mt-2 text-gray-400">Check back later for updates</p>
         </div>
       </div>
     );

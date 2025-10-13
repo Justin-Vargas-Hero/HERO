@@ -54,6 +54,7 @@ export default function MarketPage() {
   const [showAllEarnings, setShowAllEarnings] = useState(false);
   const [activeTab, setActiveTab] = useState<'gainers' | 'losers' | 'active'>('gainers');
   const [loading, setLoading] = useState(true);
+  const [indicesLoading, setIndicesLoading] = useState(true);
   const [indices, setIndices] = useState<any[]>([]);
 
   // Fetch major indices using the cache
@@ -106,8 +107,10 @@ export default function MarketPage() {
         });
 
         setIndices(indicesData);
+        setIndicesLoading(false);
       } catch (error) {
         console.error('Failed to fetch indices:', error);
+        setIndicesLoading(false);
       }
     };
 
@@ -237,7 +240,19 @@ export default function MarketPage() {
 
         {/* Market Indices */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-          {indices.map((index) => {
+          {indicesLoading ? (
+            // Show skeleton loaders when loading
+            <>
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm animate-pulse">
+                  <div className="h-3 bg-gray-200 rounded w-16 mb-2"></div>
+                  <div className="h-6 bg-gray-200 rounded w-24 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-20"></div>
+                </div>
+              ))}
+            </>
+          ) : (
+            indices.map((index) => {
             const isCrypto = index.symbol === 'BTC' || index.symbol === 'ETH';
             const isIndex = index.symbol === 'S&P' || index.symbol === 'NASDAQ' || index.symbol === 'DOW';
 
@@ -295,7 +310,8 @@ export default function MarketPage() {
                 </div>
               </Link>
             );
-          })}
+          })
+          )}
         </div>
 
         {/* Scrolling Ticker */}
