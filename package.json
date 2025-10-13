@@ -27,6 +27,7 @@
     "auth": "^1.0.2",
     "bcryptjs": "^3.0.2",
     "clsx": "^2.1.0",
+    "date-fns": "^4.1.0",
     "lightweight-charts": "^4.1.0",
     "lru-cache": "^11.2.2",
     "lucide-react": "^0.545.0",

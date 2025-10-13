@@ -5,6 +5,8 @@ import { Newspaper, Clock, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { formatPrice, formatVolume } from '@/hooks/useMarketData';
 import { Watchlist } from '@/components/market/Watchlist';
+import { ScrollingTicker } from '@/components/market/ScrollingTicker';
+import { MarketNews } from '@/components/market/MarketNews';
 import { marketDataCache } from '@/lib/market-data/cache';
 import { marketSyncManager } from '@/lib/market-data/sync-manager';
 import { formatNumber, formatCurrency } from '@/lib/utils';
@@ -294,6 +296,21 @@ export default function MarketPage() {
               </Link>
             );
           })}
+        </div>
+
+        {/* Scrolling Ticker */}
+        <div className="-mx-4 sm:-mx-6 mb-6">
+          <ScrollingTicker />
+        </div>
+
+        {/* Market News Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="lg:col-span-2">
+            <MarketNews />
+          </div>
+          <div className="lg:col-span-1">
+            {/* Empty space or could add another widget here */}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
