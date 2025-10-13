@@ -454,7 +454,9 @@ export default function MarketPage() {
                               <p className="text-xs font-inter text-gray-600">{item.name}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-xs font-inter font-medium">{item.time || 'TBD'}</p>
+                              <p className="text-xs font-inter font-medium">
+                                {item.time && item.time !== 'Time Not Supplied' ? item.time : '-'}
+                              </p>
                               {item.actual !== null && item.actual !== undefined ? (
                                 <div className="flex flex-col">
                                   <p className={`text-xs font-inter font-medium ${
