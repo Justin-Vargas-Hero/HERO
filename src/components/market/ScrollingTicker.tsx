@@ -95,8 +95,8 @@ export function ScrollingTicker() {
               href={`/symbol/${item.symbol}`}
               className="ticker-item"
             >
-              <span className="ticker-symbol">{item.symbol}</span>
-              <span className="ticker-price">${item.price.toFixed(2)}</span>
+              <span className="ticker-symbol">{item.symbol} </span>
+              <span className="ticker-price">${item.price.toFixed(2)} </span>
               <span className={`ticker-change ${
                 item.changePercent >= 0 ? 'positive' : 'negative'
               }`}>
@@ -128,7 +128,7 @@ export function ScrollingTicker() {
         .ticker-item {
           display: inline-flex;
           align-items: center;
-          padding: 0 16px;
+          padding: 0 8px;
           height: 52px;
           transition: all 0.2s ease;
           cursor: pointer;
@@ -137,7 +137,7 @@ export function ScrollingTicker() {
         }
 
         .ticker-spacer {
-          width: 60px;
+          width: 30px;
           display: inline-block;
         }
 
