@@ -1,5 +1,15 @@
 import { NextResponse } from 'next/server';
 
+interface IPOEvent {
+  symbol: string;
+  name: string;
+  date: string;
+  exchange: string;
+  price_range: string;
+  shares: number;
+  currency: string;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
@@ -17,7 +27,7 @@ export async function GET(request: Request) {
 
     // TwelveData returns IPOs grouped by date
     // Structure: { "2024-01-01": [...], "2024-01-02": [...] }
-    let events = [];
+    let events: IPOEvent[] = [];
 
     if (typeof data === 'object' && !Array.isArray(data)) {
       // Get the IPOs for the requested date
@@ -25,7 +35,7 @@ export async function GET(request: Request) {
 
       if (Array.isArray(dateIpos)) {
         // Transform to our format
-        events = dateIpos.map((item: any) => ({
+        events = dateIpos.map((item: any): IPOEvent => ({
           symbol: item.symbol,
           name: item.name,
           date: date,

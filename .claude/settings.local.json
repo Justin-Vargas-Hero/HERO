@@ -64,7 +64,9 @@
       "Bash(NODE_ENV=development npm run dev)",
       "Bash(unset NODE_ENV)",
       "Bash(powershell.exe:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   },
   "outputStyle": "default"
