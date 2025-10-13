@@ -77,6 +77,7 @@ export const ALL_SYMBOLS: Symbol[] = [
   { symbol: "BKNG", name: "Booking Holdings", exchange: "NASDAQ" },
   { symbol: "BKR", name: "Baker Hughes", exchange: "NASDAQ" },
   { symbol: "BLK", name: "BlackRock", exchange: "NYSE" },
+  { symbol: "BMRA", name: "Biomerica Inc.", exchange: "NASDAQ" },
   { symbol: "BMY", name: "Bristol-Myers Squibb", exchange: "NYSE" },
   { symbol: "BR", name: "Broadridge Financial", exchange: "NYSE" },
   { symbol: "BRK.A", name: "Berkshire Hathaway Class A", exchange: "NYSE" },
