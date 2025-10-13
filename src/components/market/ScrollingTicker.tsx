@@ -86,7 +86,7 @@ export function ScrollingTicker() {
   const duplicatedData = [...tickerData, ...tickerData];
 
   return (
-    <div className="w-full bg-white border-y border-gray-200 overflow-hidden shadow-sm">
+    <div className="w-full bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
       <div className="ticker-container">
         <div className="ticker-content">
           {duplicatedData.map((item, index) => (
@@ -102,6 +102,8 @@ export function ScrollingTicker() {
               }`}>
                 {item.changePercent >= 0 ? '+' : ''}{item.changePercent.toFixed(2)}%
               </span>
+              {/* Spacer element */}
+              <span className="ticker-spacer" />
             </Link>
           ))}
         </div>
@@ -109,40 +111,45 @@ export function ScrollingTicker() {
 
       <style jsx>{`
         .ticker-container {
-          height: 48px;
+          height: 52px;
           display: flex;
           align-items: center;
           position: relative;
+          background: white;
         }
 
         .ticker-content {
           display: flex;
-          animation: scroll 80s linear infinite;
+          animation: scroll 90s linear infinite;
           white-space: nowrap;
+          align-items: center;
         }
 
         .ticker-item {
           display: inline-flex;
           align-items: center;
-          padding: 0 24px;
-          height: 48px;
-          margin-right: 32px;
+          padding: 0 16px;
+          height: 52px;
           transition: all 0.2s ease;
           cursor: pointer;
-          gap: 10px;
+          gap: 12px;
           text-decoration: none;
-          border-radius: 6px;
+        }
+
+        .ticker-spacer {
+          width: 60px;
+          display: inline-block;
         }
 
         .ticker-item:hover {
-          background-color: #f3f4f6;
+          background-color: #f9fafb;
+          border-radius: 8px;
         }
 
         .ticker-symbol {
-          font-weight: 700;
-          color: #1f2937;
+          font-weight: 600;
+          color: #111827;
           font-size: 13px;
-          letter-spacing: 0.3px;
         }
 
         .ticker-price {
@@ -157,11 +164,11 @@ export function ScrollingTicker() {
         }
 
         .ticker-change.positive {
-          color: #10b981;
+          color: #059669;
         }
 
         .ticker-change.negative {
-          color: #ef4444;
+          color: #dc2626;
         }
 
         @keyframes scroll {

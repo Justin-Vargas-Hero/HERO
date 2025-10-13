@@ -299,7 +299,7 @@ export default function MarketPage() {
         </div>
 
         {/* Scrolling Ticker */}
-        <div className="-mx-4 sm:-mx-6 mb-6">
+        <div className="mb-6">
           <ScrollingTicker />
         </div>
 
