@@ -28,16 +28,18 @@ export function InfoTooltip({ content }: InfoTooltipProps) {
       </button>
 
       {isVisible && (
-        <div className="absolute z-50 w-64 p-3 mt-1 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg shadow-lg left-0 top-full">
-          <div className="relative">
-            {/* Arrow pointing up */}
-            <div className="absolute -top-5 left-2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[6px] border-b-gray-200"></div>
-            <div className="absolute -top-[19px] left-2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[6px] border-b-white"></div>
-
-            <p className="font-inter text-xs leading-relaxed">
-              {content}
-            </p>
+        <div className="absolute z-50 w-64 p-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg shadow-lg left-full ml-2 top-1/2 -translate-y-1/2">
+          {/* Arrow pointing left to the icon */}
+          <div className="absolute -left-2 top-1/2 -translate-y-1/2">
+            {/* Border arrow */}
+            <div className="w-0 h-0 border-t-[6px] border-t-transparent border-r-[6px] border-r-gray-200 border-b-[6px] border-b-transparent"></div>
+            {/* White fill arrow (1px offset to cover the border) */}
+            <div className="absolute -right-[5px] -top-[6px] w-0 h-0 border-t-[6px] border-t-transparent border-r-[6px] border-r-white border-b-[6px] border-b-transparent"></div>
           </div>
+
+          <p className="font-inter text-xs leading-relaxed">
+            {content}
+          </p>
         </div>
       )}
     </div>
