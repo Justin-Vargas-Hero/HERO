@@ -633,7 +633,8 @@ export default function SymbolPage() {
               symbol={symbolCode}
               title={`Latest ${symbolData.symbol} News`}
               maxItems={5}
-              showInfoTooltip={false}
+              showInfoTooltip={true}
+              infoTooltipContent={`Recent news and announcements specifically about ${symbolData.symbol}. Stay informed about company developments, earnings reports, analyst opinions, and market-moving events that could impact this stock's performance.`}
             />
           </div>
 
