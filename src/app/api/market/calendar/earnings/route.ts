@@ -84,14 +84,14 @@ export async function GET(request: Request) {
 
         // Apply exchange filter if specified
         if (exchangeFilter) {
-          const US_EXCHANGES = ['NYSE', 'NASDAQ', 'NYSEAMERICAN', 'BATS', 'OTC', 'NYSEARCA'];
+          const US_EXCHANGES = ['NYSE', 'NASDAQ', 'NYSEAMERICAN', 'BATS', 'NYSEARCA']; // Excluding OTC
           const NYSE_EXCHANGES = ['NYSE', 'NYSEARCA'];
+          const NYSE_NASDAQ = ['NYSE', 'NASDAQ', 'NYSEARCA']; // NYSE and NASDAQ only
 
           if (exchangeFilter.toUpperCase() === 'US') {
-            // Filter to US exchanges only
+            // Filter to US exchanges only (excluding OTC)
             events = events.filter(event =>
-              US_EXCHANGES.includes(event.exchange) ||
-              event.country === 'United States'
+              US_EXCHANGES.includes(event.exchange)
             );
           } else if (exchangeFilter.toUpperCase() === 'NYSE') {
             // Filter to NYSE only
@@ -102,6 +102,11 @@ export async function GET(request: Request) {
             // Filter to NASDAQ only
             events = events.filter(event =>
               event.exchange === 'NASDAQ' || event.exchange === 'NASDAQGS'
+            );
+          } else if (exchangeFilter.toUpperCase() === 'NYSE_NASDAQ') {
+            // Filter to NYSE and NASDAQ only
+            events = events.filter(event =>
+              NYSE_NASDAQ.includes(event.exchange)
             );
           } else {
             // Filter to specific exchange

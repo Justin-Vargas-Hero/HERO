@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server';
 import { serverCache } from '@/lib/market-data/server-cache';
 
-// Popular stocks to track for market movers
-// This is a fallback when the market_movers API is not available (requires paid plan)
-const POPULAR_STOCKS = [
-  'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'BRK.B',
-  'JPM', 'JNJ', 'V', 'PG', 'UNH', 'HD', 'DIS', 'MA', 'PYPL', 'BAC',
-  'NFLX', 'ADBE', 'CRM', 'PFE', 'TMO', 'ABBV', 'NKE', 'MRK', 'WMT',
-  'CVX', 'PEP', 'KO', 'CSCO', 'VZ', 'CMCSA', 'INTC', 'QCOM', 'TXN',
-  'AMD', 'NOW', 'ORCL', 'ACN', 'MDT', 'IBM', 'GE', 'CAT', 'BA', 'MMM',
-  'F', 'GM', 'T', 'MU', 'DELL', 'HPQ', 'BABA', 'SQ', 'SHOP', 'SNAP'
+// NYSE stocks to track for market movers fallback
+const NYSE_STOCKS = [
+  'JPM', 'JNJ', 'V', 'PG', 'UNH', 'HD', 'DIS', 'MA', 'BAC',
+  'PFE', 'ABBV', 'MRK', 'WMT', 'CVX', 'PEP', 'KO', 'VZ',
+  'IBM', 'GE', 'CAT', 'BA', 'MMM', 'F', 'GM', 'T',
+  'C', 'WFC', 'GS', 'MS', 'AXP', 'BLK', 'SCHW', 'USB',
+  'PNC', 'TFC', 'COF', 'BK', 'STT', 'TRV', 'MET', 'PRU',
+  'AIG', 'CB', 'CME', 'ICE', 'SPGI', 'MCO', 'MSCI'
 ];
 
 export async function GET() {
@@ -40,63 +39,79 @@ export async function GET() {
       }
     }
 
-    // First, try the market_movers API (requires paid plan)
+    // Try the market_movers API with separate direction calls
     try {
-      const response = await fetch(
-        `https://api.twelvedata.com/market_movers/stocks?apikey=${process.env.TWELVEDATA_API_KEY}`,
-        {
-          next: { revalidate: 3600 }, // Next.js cache for 1 hour
-        }
-      );
+      const [gainersRes, losersRes, activeRes] = await Promise.all([
+        fetch(
+          `https://api.twelvedata.com/market_movers/stocks?direction=gainers&apikey=${process.env.TWELVEDATA_API_KEY}`,
+          { next: { revalidate: 3600 } }
+        ),
+        fetch(
+          `https://api.twelvedata.com/market_movers/stocks?direction=losers&apikey=${process.env.TWELVEDATA_API_KEY}`,
+          { next: { revalidate: 3600 } }
+        ),
+        fetch(
+          `https://api.twelvedata.com/market_movers/stocks?direction=most_active&apikey=${process.env.TWELVEDATA_API_KEY}`,
+          { next: { revalidate: 3600 } }
+        )
+      ]);
 
-      if (response.ok) {
-        const data = await response.json();
+      if (gainersRes.ok && losersRes.ok && activeRes.ok) {
+        const [gainersData, losersData, activeData] = await Promise.all([
+          gainersRes.json(),
+          losersRes.json(),
+          activeRes.json()
+        ]);
 
-        // Check if we got valid data
-        if (data.values && Array.isArray(data.values) && data.values.length > 0) {
-          // Transform the data to our format
-          const transformStock = (item: any) => ({
-            symbol: item.symbol || '',
-            name: item.name || '',
-            price: item.last || item.price || 0,
-            change: item.change || 0,
-            percent_change: item.percent_change || 0,
-            volume: item.volume || 0
-          });
+        // Transform the data to our format
+        const transformStock = (item: any) => ({
+          symbol: item.symbol || '',
+          name: item.name || '',
+          price: item.last || item.price || 0,
+          change: item.change || 0,
+          percent_change: item.percent_change || 0,
+          volume: item.volume || 0,
+          exchange: item.exchange || ''
+        });
 
-          const transformed = {
-            gainers: (data.values?.filter((item: any) => item.percent_change > 0)
-              .sort((a: any, b: any) => b.percent_change - a.percent_change)
-              .slice(0, 5) || []).map(transformStock),
-            losers: (data.values?.filter((item: any) => item.percent_change < 0)
-              .sort((a: any, b: any) => a.percent_change - b.percent_change)
-              .slice(0, 5) || []).map(transformStock),
-            most_active: (data.values?.sort((a: any, b: any) => b.volume - a.volume)
-              .slice(0, 5) || []).map(transformStock)
-          };
+        // Filter to NYSE only
+        const filterNYSE = (data: any) => {
+          if (data.values && Array.isArray(data.values)) {
+            return data.values
+              .filter((item: any) => item.exchange === 'NYSE')
+              .slice(0, 10)
+              .map(transformStock);
+          }
+          return [];
+        };
 
-          // Cache the transformed data with 1-hour cooldown
-          serverCache.set(cacheKey, transformed, 'movers');
+        const transformed = {
+          gainers: filterNYSE(gainersData),
+          losers: filterNYSE(losersData),
+          most_active: filterNYSE(activeData)
+        };
 
-          // Resolve any pending requests
-          serverCache.resolvePending(cacheKey, transformed);
+        // Cache the transformed data with 1-hour cooldown
+        serverCache.set(cacheKey, transformed, 'movers');
 
-          return NextResponse.json({
-            ...transformed,
-            cached: false,
-            source: 'api'
-          });
-        }
+        // Resolve any pending requests
+        serverCache.resolvePending(cacheKey, transformed);
+
+        return NextResponse.json({
+          ...transformed,
+          cached: false,
+          source: 'api'
+        });
       }
     } catch (error) {
-      console.log('Market movers API not available, using fallback method');
+      console.log('Market movers API failed, using fallback method');
     }
 
-    // Fallback: Use batch quotes for popular stocks
-    console.log('Using fallback market movers with popular stocks');
+    // Fallback: Use batch quotes for NYSE stocks
+    console.log('Using fallback market movers with NYSE stocks');
 
-    // Get batch quotes for popular stocks
-    const symbolsStr = POPULAR_STOCKS.join(',');
+    // Get batch quotes for NYSE stocks
+    const symbolsStr = NYSE_STOCKS.join(',');
     const quotesResponse = await fetch(
       `https://api.twelvedata.com/quote?symbol=${symbolsStr}&apikey=${process.env.TWELVEDATA_API_KEY}`,
       {
