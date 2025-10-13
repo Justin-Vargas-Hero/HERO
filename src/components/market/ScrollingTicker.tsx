@@ -74,7 +74,7 @@ export function ScrollingTicker() {
 
   if (loading || tickerData.length === 0) {
     return (
-      <div className="w-full h-12 bg-gray-900 border-y border-gray-800">
+      <div className="w-full h-14 bg-gray-900 border-y border-gray-700">
         <div className="h-full flex items-center justify-center">
           <div className="animate-pulse text-gray-600 text-sm">Loading market data...</div>
         </div>
@@ -86,7 +86,7 @@ export function ScrollingTicker() {
   const duplicatedData = [...tickerData, ...tickerData];
 
   return (
-    <div className="w-full bg-gray-900 border-y border-gray-800 overflow-hidden">
+    <div className="w-full bg-gray-900 border-y border-gray-700 overflow-hidden">
       <div className="ticker-container">
         <div className="ticker-content">
           {duplicatedData.map((item, index) => (
@@ -95,12 +95,13 @@ export function ScrollingTicker() {
               href={`/symbol/${item.symbol}`}
               className="ticker-item"
             >
-              <span className="font-semibold text-white">{item.symbol}</span>
-              <span className="mx-2 text-gray-400">${item.price.toFixed(2)}</span>
-              <span className={`font-medium ${
-                item.changePercent >= 0 ? 'text-green-400' : 'text-red-400'
+              <span className="ticker-symbol">{item.symbol}</span>
+              <span className="ticker-price">${item.price.toFixed(2)}</span>
+              <span className={`ticker-change ${
+                item.changePercent >= 0 ? 'positive' : 'negative'
               }`}>
-                {item.changePercent >= 0 ? '▲' : '▼'} {Math.abs(item.changePercent).toFixed(2)}%
+                <span className="ticker-arrow">{item.changePercent >= 0 ? '▲' : '▼'}</span>
+                <span className="ticker-percent">{Math.abs(item.changePercent).toFixed(2)}%</span>
               </span>
             </Link>
           ))}
@@ -109,7 +110,7 @@ export function ScrollingTicker() {
 
       <style jsx>{`
         .ticker-container {
-          height: 48px;
+          height: 56px;
           display: flex;
           align-items: center;
           position: relative;
@@ -117,21 +118,61 @@ export function ScrollingTicker() {
 
         .ticker-content {
           display: flex;
-          animation: scroll 60s linear infinite;
+          animation: scroll 90s linear infinite;
           white-space: nowrap;
         }
 
         .ticker-item {
           display: inline-flex;
           align-items: center;
-          padding: 0 24px;
-          height: 48px;
-          border-right: 1px solid rgb(31 41 55);
-          transition: background-color 0.2s;
+          padding: 0 40px;
+          height: 56px;
+          border-right: 2px solid rgb(31 41 55);
+          transition: all 0.3s ease;
+          cursor: pointer;
+          gap: 12px;
         }
 
         .ticker-item:hover {
-          background-color: rgba(55, 65, 81, 0.5);
+          background-color: rgba(55, 65, 81, 0.4);
+          transform: scale(1.02);
+        }
+
+        .ticker-symbol {
+          font-weight: 700;
+          color: #ffffff;
+          font-size: 14px;
+          letter-spacing: 0.5px;
+        }
+
+        .ticker-price {
+          color: #9ca3af;
+          font-size: 14px;
+          font-weight: 500;
+        }
+
+        .ticker-change {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-weight: 600;
+          font-size: 13px;
+        }
+
+        .ticker-change.positive {
+          color: #4ade80;
+        }
+
+        .ticker-change.negative {
+          color: #f87171;
+        }
+
+        .ticker-arrow {
+          font-size: 10px;
+        }
+
+        .ticker-percent {
+          font-size: 13px;
         }
 
         @keyframes scroll {
