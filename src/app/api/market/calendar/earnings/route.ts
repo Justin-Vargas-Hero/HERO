@@ -16,6 +16,7 @@ interface EarningsEvent {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
+  const exchangeFilter = searchParams.get('exchange'); // 'US' for US exchanges, 'NYSE' for NYSE only, or null for all
 
   try {
     const response = await fetch(
@@ -80,6 +81,35 @@ export async function GET(request: Request) {
 
         // Sort by company name
         events.sort((a, b) => a.name.localeCompare(b.name));
+
+        // Apply exchange filter if specified
+        if (exchangeFilter) {
+          const US_EXCHANGES = ['NYSE', 'NASDAQ', 'NYSEAMERICAN', 'BATS', 'OTC', 'NYSEARCA'];
+          const NYSE_EXCHANGES = ['NYSE', 'NYSEARCA'];
+
+          if (exchangeFilter.toUpperCase() === 'US') {
+            // Filter to US exchanges only
+            events = events.filter(event =>
+              US_EXCHANGES.includes(event.exchange) ||
+              event.country === 'United States'
+            );
+          } else if (exchangeFilter.toUpperCase() === 'NYSE') {
+            // Filter to NYSE only
+            events = events.filter(event =>
+              NYSE_EXCHANGES.includes(event.exchange)
+            );
+          } else if (exchangeFilter.toUpperCase() === 'NASDAQ') {
+            // Filter to NASDAQ only
+            events = events.filter(event =>
+              event.exchange === 'NASDAQ' || event.exchange === 'NASDAQGS'
+            );
+          } else {
+            // Filter to specific exchange
+            events = events.filter(event =>
+              event.exchange === exchangeFilter.toUpperCase()
+            );
+          }
+        }
       }
     }
 

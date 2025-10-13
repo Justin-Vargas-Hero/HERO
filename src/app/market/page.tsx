@@ -194,7 +194,7 @@ export default function MarketPage() {
     const loadCalendarEvents = async () => {
       try {
         const [earningsRes, dividendsRes, ipoRes] = await Promise.all([
-          fetch('/api/market/calendar/earnings'),
+          fetch('/api/market/calendar/earnings?exchange=US'), // Filter to US exchanges only
           fetch('/api/market/calendar/dividends'),
           fetch('/api/market/calendar/ipo')
         ]);
