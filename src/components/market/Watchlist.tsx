@@ -213,7 +213,7 @@ export function Watchlist() {
             ))}
           </div>
         ) : watchlistItems.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-[520px] overflow-y-auto pr-2 thin-scrollbar">
             {watchlistItems.map(watchSymbol => {
               const watchQuote = watchlistQuotes[watchSymbol];
               const watchChart = watchlistCharts[watchSymbol];

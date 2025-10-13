@@ -320,8 +320,9 @@ export default function MarketPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content - Market Movers */}
-          <div className="lg:col-span-2">
+          {/* Left Column - Market Movers and Market News */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Market Movers */}
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
               <div className="p-5">
                 <div className="flex items-center justify-between mb-4">
@@ -420,20 +421,21 @@ export default function MarketPage() {
               </div>
             </div>
 
-            {/* Market News and Today's Events Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-              {/* Market News - Takes 2 columns */}
-              <div className="lg:col-span-2">
-                <MarketNews />
-              </div>
+            {/* Market News */}
+            <MarketNews />
+          </div>
 
-              {/* Today's Events - Takes 1 column */}
-              <div className="lg:col-span-1">
-                <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-                  <div className="p-5">
-                    <h2 className="text-lg font-manrope font-semibold mb-4">
-                      Today's Events
-                    </h2>
+          {/* Right Column - Watchlist and Today's Events */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Watchlist */}
+            <Watchlist />
+
+            {/* Today's Events */}
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+              <div className="p-5">
+                <h2 className="text-lg font-manrope font-semibold mb-4">
+                  Today's Events
+                </h2>
 
                 <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 thin-scrollbar">
                   {/* Earnings */}
@@ -547,16 +549,9 @@ export default function MarketPage() {
                         No market events scheduled for today
                       </p>
                     )}
-                  </div>
                 </div>
               </div>
             </div>
-            </div>
-          </div>
-
-          {/* Sidebar - Watchlist */}
-          <div>
-            <Watchlist />
           </div>
         </div>
       </div>
