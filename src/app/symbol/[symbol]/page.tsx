@@ -12,6 +12,7 @@ import TradingViewChart from '@/components/market/TradingViewChart';
 import { marketSyncManager } from '@/lib/market-data/sync-manager';
 import { Watchlist } from '@/components/market/Watchlist';
 import { NewsWidget } from '@/components/market/NewsWidget';
+import { InfoTooltip } from '@/components/InfoTooltip';
 import { formatNumber, formatCurrency } from '@/lib/utils';
 
 interface CompanyProfile {
@@ -433,7 +434,10 @@ export default function SymbolPage() {
             {/* Chart */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-4">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-manrope font-semibold">Price Chart</h2>
+                <h2 className="text-lg font-manrope font-semibold flex items-center">
+                  Price Chart
+                  <InfoTooltip content="Interactive price chart showing historical trading data. Switch between different time periods to analyze short-term movements or long-term trends. Candlestick patterns help identify support/resistance levels and potential trading opportunities." />
+                </h2>
 
                 {/* Time Period Toggles */}
                 <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
@@ -477,7 +481,10 @@ export default function SymbolPage() {
             {/* Key Statistics */}
             {quote && (
               <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-4">
-                <h2 className="text-lg font-manrope font-semibold mb-4">Key Statistics</h2>
+                <h2 className="text-lg font-manrope font-semibold mb-4 flex items-center">
+                  Key Statistics
+                  <InfoTooltip content="Essential financial metrics and trading data for this security. Includes real-time price information, trading volume, daily ranges, and historical performance indicators. Use these statistics to evaluate investment opportunities and compare with other securities." />
+                </h2>
                 <div className="grid grid-cols-4 gap-6">
                   <div>
                     <p className="text-xs text-gray-500 mb-1 font-inter">Market cap</p>
@@ -533,7 +540,10 @@ export default function SymbolPage() {
 
             {/* About Section */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-4">
-              <h2 className="text-lg font-manrope font-semibold mb-4">About {symbolData.symbol}</h2>
+              <h2 className="text-lg font-manrope font-semibold mb-4 flex items-center">
+                About {symbolData.symbol}
+                <InfoTooltip content="Company overview and fundamental information. Learn about the business model, leadership team, sector classification, and corporate details. This information helps you understand what the company does and how it operates in its market." />
+              </h2>
               {profileLoading ? (
                 <div className="animate-pulse">
                   <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
