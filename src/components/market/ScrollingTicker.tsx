@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { marketDataCache } from '@/lib/market-data/cache';
+import { ALL_SYMBOLS } from '@/data/symbol-database';
 
 interface TickerItem {
   symbol: string;
@@ -11,13 +12,19 @@ interface TickerItem {
   changePercent: number;
 }
 
-// Popular stocks for the ticker
-const TICKER_SYMBOLS = [
-  'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA',
-  'JPM', 'V', 'JNJ', 'WMT', 'PG', 'MA', 'UNH', 'DIS',
-  'HD', 'BAC', 'XOM', 'CVX', 'PFE', 'ABBV', 'KO', 'PEP',
-  'VZ', 'T', 'NFLX', 'AMD', 'INTC', 'CRM', 'ORCL', 'IBM'
-];
+// Get popular stocks from ALL_SYMBOLS for the ticker
+// Take a mix of different exchanges and popular stocks
+const TICKER_SYMBOLS = ALL_SYMBOLS
+  .filter(symbol => {
+    // Include major stocks and exclude cryptos for the ticker
+    const popularStocks = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA',
+      'JPM', 'V', 'JNJ', 'WMT', 'PG', 'MA', 'UNH', 'DIS',
+      'HD', 'BAC', 'XOM', 'CVX', 'PFE', 'ABBV', 'KO', 'PEP',
+      'VZ', 'T', 'NFLX', 'AMD', 'INTC', 'CRM', 'ORCL', 'IBM',
+      'SPY', 'QQQ', 'COIN', 'PLTR', 'SOFI', 'HOOD', 'RBLX', 'ABNB'];
+    return popularStocks.includes(symbol.symbol);
+  })
+  .map(symbol => symbol.symbol);
 
 export function ScrollingTicker() {
   const [tickerData, setTickerData] = useState<TickerItem[]>([]);
@@ -98,8 +105,8 @@ export function ScrollingTicker() {
               <span className="ticker-symbol">{item.symbol} </span>
               <span className="ticker-price">${item.price.toFixed(2)} </span>
               <span className={`ticker-change ${
-                item.changePercent >= 0 ? 'positive' : 'negative'
-              }`}>
+                item.changePercent >= 0 ? 'text-green-600' : 'text-red-600'
+              } font-semibold text-xs`}>
                 {item.changePercent >= 0 ? '+' : ''}{item.changePercent.toFixed(2)}%
               </span>
               {/* Spacer element */}
@@ -111,7 +118,7 @@ export function ScrollingTicker() {
 
       <style jsx>{`
         .ticker-container {
-          height: 52px;
+          height: 32px;
           display: flex;
           align-items: center;
           position: relative;
@@ -159,16 +166,7 @@ export function ScrollingTicker() {
         }
 
         .ticker-change {
-          font-weight: 600;
-          font-size: 12px;
-        }
-
-        .ticker-change.positive {
-          color: #059669;
-        }
-
-        .ticker-change.negative {
-          color: #dc2626;
+          /* Styles moved to Tailwind classes */
         }
 
         @keyframes scroll {

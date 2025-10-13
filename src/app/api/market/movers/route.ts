@@ -1,30 +1,11 @@
 import { NextResponse } from 'next/server';
 import { serverCache } from '@/lib/market-data/server-cache';
+import { ALL_SYMBOLS } from '@/data/symbol-database';
 
-// NYSE stocks to track for market movers fallback - expanded list
-const NYSE_STOCKS = [
-  // Financials
-  'JPM', 'BAC', 'WFC', 'GS', 'MS', 'C', 'BLK', 'SCHW', 'AXP', 'USB',
-  'PNC', 'TFC', 'COF', 'BK', 'STT', 'TRV', 'MET', 'PRU', 'AIG', 'CB',
-  'CME', 'ICE', 'SPGI', 'MCO', 'MSCI',
-  // Healthcare
-  'JNJ', 'PFE', 'ABBV', 'MRK', 'LLY', 'TMO', 'ABT', 'BMY', 'CVS', 'CI',
-  'HUM', 'MDT', 'ELV', 'SYK', 'BSX',
-  // Tech/Industrials
-  'V', 'MA', 'IBM', 'GE', 'CAT', 'BA', 'MMM', 'HON', 'UPS', 'RTX',
-  'LMT', 'DE', 'NOC', 'GD', 'EMR',
-  // Consumer
-  'PG', 'HD', 'DIS', 'WMT', 'PEP', 'KO', 'MCD', 'NKE', 'SBUX', 'TGT',
-  'LOW', 'TJX', 'YUM', 'CL', 'EL',
-  // Energy & Telecom
-  'CVX', 'XOM', 'COP', 'SLB', 'EOG', 'PSX', 'VLO', 'MPC', 'OXY', 'HAL',
-  'VZ', 'T', 'TMUS',
-  // Healthcare/Pharma
-  'UNH', 'JNJ', 'PFE', 'ABBV', 'MRK', 'LLY', 'TMO', 'ABT', 'BMY', 'AMGN',
-  // More large caps
-  'BRK.B', 'PM', 'UNP', 'NEE', 'LIN', 'DHR', 'SO', 'DUK', 'D', 'AEP',
-  'F', 'GM', 'TSLA', 'NIO', 'RIVN'
-];
+// Get tradeable stocks from ALL_SYMBOLS (exclude cryptos for batch quotes)
+const STOCK_SYMBOLS = ALL_SYMBOLS
+  .filter(symbol => symbol.exchange !== 'CRYPTO' && !symbol.symbol.includes('/'))
+  .map(symbol => symbol.symbol);
 
 export async function GET() {
   const cacheKey = 'market:movers';
@@ -54,11 +35,16 @@ export async function GET() {
       }
     }
 
-    // Skip market_movers API (currently not returning data) and use batch quotes for NYSE stocks
-    console.log('Using fallback market movers with NYSE stocks');
+    // Skip market_movers API (currently not returning data) and use batch quotes for stocks
+    console.log('Using fallback market movers with ALL_SYMBOLS stocks');
 
-    // Get batch quotes for NYSE stocks
-    const symbolsStr = NYSE_STOCKS.join(',');
+    // For efficiency, we'll batch requests - TwelveData allows multiple symbols in one request
+    // Reduce batch size to avoid API limits and improve reliability
+    const popularSymbols = STOCK_SYMBOLS.slice(0, 30); // Reduced to 30 for better reliability
+
+    // Get batch quotes for stocks
+    const symbolsStr = popularSymbols.join(',');
+    console.log('Fetching symbols:', symbolsStr);
     const quotesResponse = await fetch(
       `https://api.twelvedata.com/quote?symbol=${symbolsStr}&apikey=${process.env.TWELVEDATA_API_KEY}`,
       {
@@ -71,6 +57,12 @@ export async function GET() {
     }
 
     const quotesData = await quotesResponse.json();
+
+    // Check for API errors
+    if (quotesData.code || quotesData.status === 'error') {
+      console.error('TwelveData API Error:', quotesData.message || quotesData);
+      throw new Error(`API Error: ${quotesData.message || 'Unknown error'}`);
+    }
 
     // Transform batch quotes to array format
     const stocksArray: any[] = [];

@@ -452,7 +452,7 @@ export const ALL_SYMBOLS: Symbol[] = [
   { symbol: "TER", name: "Teradyne", exchange: "NASDAQ" },
   { symbol: "TFC", name: "Truist Financial", exchange: "NYSE" },
   { symbol: "TFX", name: "Teleflex", exchange: "NYSE" },
-  { symbol: "TGT", name: "Target", exchange: "NYSE" },
+  { symbol: " ", name: "Target", exchange: "NYSE" },
   { symbol: "TJX", name: "TJX Companies", exchange: "NYSE" },
   { symbol: "TMO", name: "Thermo Fisher Scientific", exchange: "NYSE" },
   { symbol: "TMUS", name: "T-Mobile US", exchange: "NASDAQ" },
