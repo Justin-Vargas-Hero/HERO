@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ExternalLink, Clock, TrendingUp } from 'lucide-react';
+import { ExternalLink, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface NewsItem {
@@ -80,7 +80,6 @@ export function MarketNews() {
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
         <h2 className="text-lg font-manrope font-semibold mb-4">Market News</h2>
         <div className="text-center py-8 text-gray-500 text-sm">
-          <TrendingUp className="w-8 h-8 mx-auto mb-2 text-gray-400" />
           <p>{error ? 'Unable to load market news' : 'No market news available at this time'}</p>
           <p className="text-xs mt-2 text-gray-400">Check back later for updates</p>
         </div>
@@ -92,7 +91,6 @@ export function MarketNews() {
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
       <div className="p-5 border-b border-gray-200">
         <h2 className="text-lg font-manrope font-semibold flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-gray-600" />
           Market News
         </h2>
       </div>

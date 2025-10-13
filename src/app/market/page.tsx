@@ -319,16 +319,6 @@ export default function MarketPage() {
           <ScrollingTicker />
         </div>
 
-        {/* Market News Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-2">
-            <MarketNews />
-          </div>
-          <div className="lg:col-span-1">
-            {/* Empty space or could add another widget here */}
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content - Market Movers */}
           <div className="lg:col-span-2">
@@ -430,12 +420,20 @@ export default function MarketPage() {
               </div>
             </div>
 
-            {/* Market Calendar */}
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm mt-6">
-              <div className="p-5">
-                <h2 className="text-lg font-manrope font-semibold mb-4">
-                  Today's Events
-                </h2>
+            {/* Market News and Today's Events Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+              {/* Market News - Takes 2 columns */}
+              <div className="lg:col-span-2">
+                <MarketNews />
+              </div>
+
+              {/* Today's Events - Takes 1 column */}
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+                  <div className="p-5">
+                    <h2 className="text-lg font-manrope font-semibold mb-4">
+                      Today's Events
+                    </h2>
 
                 <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 thin-scrollbar">
                   {/* Earnings */}
@@ -544,11 +542,12 @@ export default function MarketPage() {
                     </div>
                   )}
 
-                  {earnings.length === 0 && dividends.length === 0 && ipos.length === 0 && (
-                    <p className="text-sm font-inter text-gray-500 text-center py-4">
-                      No market events scheduled for today
-                    </p>
-                  )}
+                    {earnings.length === 0 && dividends.length === 0 && ipos.length === 0 && (
+                      <p className="text-sm font-inter text-gray-500 text-center py-4">
+                        No market events scheduled for today
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
