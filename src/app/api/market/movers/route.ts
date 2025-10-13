@@ -1,14 +1,29 @@
 import { NextResponse } from 'next/server';
 import { serverCache } from '@/lib/market-data/server-cache';
 
-// NYSE stocks to track for market movers fallback
+// NYSE stocks to track for market movers fallback - expanded list
 const NYSE_STOCKS = [
-  'JPM', 'JNJ', 'V', 'PG', 'UNH', 'HD', 'DIS', 'MA', 'BAC',
-  'PFE', 'ABBV', 'MRK', 'WMT', 'CVX', 'PEP', 'KO', 'VZ',
-  'IBM', 'GE', 'CAT', 'BA', 'MMM', 'F', 'GM', 'T',
-  'C', 'WFC', 'GS', 'MS', 'AXP', 'BLK', 'SCHW', 'USB',
-  'PNC', 'TFC', 'COF', 'BK', 'STT', 'TRV', 'MET', 'PRU',
-  'AIG', 'CB', 'CME', 'ICE', 'SPGI', 'MCO', 'MSCI'
+  // Financials
+  'JPM', 'BAC', 'WFC', 'GS', 'MS', 'C', 'BLK', 'SCHW', 'AXP', 'USB',
+  'PNC', 'TFC', 'COF', 'BK', 'STT', 'TRV', 'MET', 'PRU', 'AIG', 'CB',
+  'CME', 'ICE', 'SPGI', 'MCO', 'MSCI',
+  // Healthcare
+  'JNJ', 'PFE', 'ABBV', 'MRK', 'LLY', 'TMO', 'ABT', 'BMY', 'CVS', 'CI',
+  'HUM', 'MDT', 'ELV', 'SYK', 'BSX',
+  // Tech/Industrials
+  'V', 'MA', 'IBM', 'GE', 'CAT', 'BA', 'MMM', 'HON', 'UPS', 'RTX',
+  'LMT', 'DE', 'NOC', 'GD', 'EMR',
+  // Consumer
+  'PG', 'HD', 'DIS', 'WMT', 'PEP', 'KO', 'MCD', 'NKE', 'SBUX', 'TGT',
+  'LOW', 'TJX', 'YUM', 'CL', 'EL',
+  // Energy & Telecom
+  'CVX', 'XOM', 'COP', 'SLB', 'EOG', 'PSX', 'VLO', 'MPC', 'OXY', 'HAL',
+  'VZ', 'T', 'TMUS',
+  // Healthcare/Pharma
+  'UNH', 'JNJ', 'PFE', 'ABBV', 'MRK', 'LLY', 'TMO', 'ABT', 'BMY', 'AMGN',
+  // More large caps
+  'BRK.B', 'PM', 'UNP', 'NEE', 'LIN', 'DHR', 'SO', 'DUK', 'D', 'AEP',
+  'F', 'GM', 'TSLA', 'NIO', 'RIVN'
 ];
 
 export async function GET() {
@@ -39,75 +54,7 @@ export async function GET() {
       }
     }
 
-    // Try the market_movers API with separate direction calls
-    try {
-      const [gainersRes, losersRes, activeRes] = await Promise.all([
-        fetch(
-          `https://api.twelvedata.com/market_movers/stocks?direction=gainers&apikey=${process.env.TWELVEDATA_API_KEY}`,
-          { next: { revalidate: 3600 } }
-        ),
-        fetch(
-          `https://api.twelvedata.com/market_movers/stocks?direction=losers&apikey=${process.env.TWELVEDATA_API_KEY}`,
-          { next: { revalidate: 3600 } }
-        ),
-        fetch(
-          `https://api.twelvedata.com/market_movers/stocks?direction=most_active&apikey=${process.env.TWELVEDATA_API_KEY}`,
-          { next: { revalidate: 3600 } }
-        )
-      ]);
-
-      if (gainersRes.ok && losersRes.ok && activeRes.ok) {
-        const [gainersData, losersData, activeData] = await Promise.all([
-          gainersRes.json(),
-          losersRes.json(),
-          activeRes.json()
-        ]);
-
-        // Transform the data to our format
-        const transformStock = (item: any) => ({
-          symbol: item.symbol || '',
-          name: item.name || '',
-          price: item.last || item.price || 0,
-          change: item.change || 0,
-          percent_change: item.percent_change || 0,
-          volume: item.volume || 0,
-          exchange: item.exchange || ''
-        });
-
-        // Filter to NYSE only
-        const filterNYSE = (data: any) => {
-          if (data.values && Array.isArray(data.values)) {
-            return data.values
-              .filter((item: any) => item.exchange === 'NYSE')
-              .slice(0, 10)
-              .map(transformStock);
-          }
-          return [];
-        };
-
-        const transformed = {
-          gainers: filterNYSE(gainersData),
-          losers: filterNYSE(losersData),
-          most_active: filterNYSE(activeData)
-        };
-
-        // Cache the transformed data with 1-hour cooldown
-        serverCache.set(cacheKey, transformed, 'movers');
-
-        // Resolve any pending requests
-        serverCache.resolvePending(cacheKey, transformed);
-
-        return NextResponse.json({
-          ...transformed,
-          cached: false,
-          source: 'api'
-        });
-      }
-    } catch (error) {
-      console.log('Market movers API failed, using fallback method');
-    }
-
-    // Fallback: Use batch quotes for NYSE stocks
+    // Skip market_movers API (currently not returning data) and use batch quotes for NYSE stocks
     console.log('Using fallback market movers with NYSE stocks');
 
     // Get batch quotes for NYSE stocks
@@ -161,20 +108,20 @@ export async function GET() {
         volume: parseInt(stock.volume || 0)
       }));
 
-    // Sort and categorize
+    // Sort and categorize - showing top 10 for each category
     const gainers = validStocks
       .filter(stock => stock.percent_change > 0)
       .sort((a, b) => b.percent_change - a.percent_change)
-      .slice(0, 5);
+      .slice(0, 10);
 
     const losers = validStocks
       .filter(stock => stock.percent_change < 0)
       .sort((a, b) => a.percent_change - b.percent_change)
-      .slice(0, 5);
+      .slice(0, 10);
 
     const most_active = validStocks
       .sort((a, b) => b.volume - a.volume)
-      .slice(0, 5);
+      .slice(0, 10);
 
     const transformed = {
       gainers,
