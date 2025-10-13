@@ -416,7 +416,7 @@ export default function SymbolPage() {
     <div className="min-h-screen bg-white">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
         {/* Back Button */}
-        <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-black mb-3 font-inter">
+        <Link href="/market" className="inline-flex items-center gap-2 text-gray-600 hover:text-black mb-3 font-inter">
           <ArrowLeft className="h-4 w-4" />
           Back
         </Link>
