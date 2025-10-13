@@ -240,13 +240,27 @@ export default function SymbolPage() {
                 // Stock times are in exchange timezone
                 const exchangeTz = data.meta?.exchange_timezone || 'America/New_York';
 
+                // Check if datetime contains time component
+                const hasTime = item.datetime.includes(':');
+
                 if (exchangeTz === 'America/New_York') {
                   // US markets use ET (UTC-4 in summer, UTC-5 in winter)
-                  // October 2025 is EDT (UTC-4)
-                  date = new Date(item.datetime.replace(' ', 'T') + '-04:00');
+                  if (hasTime) {
+                    // Intraday data has time (e.g., "2025-10-13 09:30:00")
+                    // October 2025 is EDT (UTC-4)
+                    date = new Date(item.datetime.replace(' ', 'T') + '-04:00');
+                  } else {
+                    // Daily/weekly/monthly data has only date (e.g., "2025-10-13")
+                    // Set to market close time (4 PM ET)
+                    date = new Date(item.datetime + 'T16:00:00-04:00');
+                  }
                 } else {
                   // For other exchanges, assume UTC
-                  date = new Date(item.datetime + 'Z');
+                  if (hasTime) {
+                    date = new Date(item.datetime.replace(' ', 'T') + 'Z');
+                  } else {
+                    date = new Date(item.datetime + 'T00:00:00Z');
+                  }
                 }
               }
 
