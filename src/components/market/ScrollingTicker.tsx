@@ -74,9 +74,9 @@ export function ScrollingTicker() {
 
   if (loading || tickerData.length === 0) {
     return (
-      <div className="w-full h-14 bg-gray-900 border-y border-gray-700">
+      <div className="w-full h-12 bg-white border-y border-gray-200">
         <div className="h-full flex items-center justify-center">
-          <div className="animate-pulse text-gray-600 text-sm">Loading market data...</div>
+          <div className="animate-pulse text-gray-400 text-sm">Loading market data...</div>
         </div>
       </div>
     );
@@ -86,7 +86,7 @@ export function ScrollingTicker() {
   const duplicatedData = [...tickerData, ...tickerData];
 
   return (
-    <div className="w-full bg-gray-900 border-y border-gray-700 overflow-hidden">
+    <div className="w-full bg-white border-y border-gray-200 overflow-hidden shadow-sm">
       <div className="ticker-container">
         <div className="ticker-content">
           {duplicatedData.map((item, index) => (
@@ -100,8 +100,7 @@ export function ScrollingTicker() {
               <span className={`ticker-change ${
                 item.changePercent >= 0 ? 'positive' : 'negative'
               }`}>
-                <span className="ticker-arrow">{item.changePercent >= 0 ? '▲' : '▼'}</span>
-                <span className="ticker-percent">{Math.abs(item.changePercent).toFixed(2)}%</span>
+                {item.changePercent >= 0 ? '+' : ''}{item.changePercent.toFixed(2)}%
               </span>
             </Link>
           ))}
@@ -110,7 +109,7 @@ export function ScrollingTicker() {
 
       <style jsx>{`
         .ticker-container {
-          height: 56px;
+          height: 48px;
           display: flex;
           align-items: center;
           position: relative;
@@ -118,61 +117,51 @@ export function ScrollingTicker() {
 
         .ticker-content {
           display: flex;
-          animation: scroll 90s linear infinite;
+          animation: scroll 80s linear infinite;
           white-space: nowrap;
         }
 
         .ticker-item {
           display: inline-flex;
           align-items: center;
-          padding: 0 40px;
-          height: 56px;
-          border-right: 2px solid rgb(31 41 55);
-          transition: all 0.3s ease;
+          padding: 0 24px;
+          height: 48px;
+          margin-right: 32px;
+          transition: all 0.2s ease;
           cursor: pointer;
-          gap: 12px;
+          gap: 10px;
+          text-decoration: none;
+          border-radius: 6px;
         }
 
         .ticker-item:hover {
-          background-color: rgba(55, 65, 81, 0.4);
-          transform: scale(1.02);
+          background-color: #f3f4f6;
         }
 
         .ticker-symbol {
           font-weight: 700;
-          color: #ffffff;
-          font-size: 14px;
-          letter-spacing: 0.5px;
+          color: #1f2937;
+          font-size: 13px;
+          letter-spacing: 0.3px;
         }
 
         .ticker-price {
-          color: #9ca3af;
-          font-size: 14px;
+          color: #6b7280;
+          font-size: 13px;
           font-weight: 500;
         }
 
         .ticker-change {
-          display: flex;
-          align-items: center;
-          gap: 4px;
           font-weight: 600;
-          font-size: 13px;
+          font-size: 12px;
         }
 
         .ticker-change.positive {
-          color: #4ade80;
+          color: #10b981;
         }
 
         .ticker-change.negative {
-          color: #f87171;
-        }
-
-        .ticker-arrow {
-          font-size: 10px;
-        }
-
-        .ticker-percent {
-          font-size: 13px;
+          color: #ef4444;
         }
 
         @keyframes scroll {
