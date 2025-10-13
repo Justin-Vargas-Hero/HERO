@@ -48,6 +48,8 @@ export default function MarketPage() {
   const [earnings, setEarnings] = useState<CalendarEvent[]>([]);
   const [dividends, setDividends] = useState<CalendarEvent[]>([]);
   const [ipos, setIPOs] = useState<CalendarEvent[]>([]);
+  const [allEarnings, setAllEarnings] = useState<CalendarEvent[]>([]);
+  const [showAllEarnings, setShowAllEarnings] = useState(false);
   const [activeTab, setActiveTab] = useState<'gainers' | 'losers' | 'active'>('gainers');
   const [loading, setLoading] = useState(true);
   const [indices, setIndices] = useState<any[]>([]);
@@ -203,9 +205,9 @@ export default function MarketPage() {
           ipoRes.json()
         ]);
 
-        setEarnings(earningsData.slice(0, 3));
-        setDividends(dividendsData.slice(0, 3));
-        setIPOs(ipoData.slice(0, 3));
+        setEarnings(earningsData.slice(0, 10));
+        setDividends(dividendsData.slice(0, 8));
+        setIPOs(ipoData.slice(0, 5));
       } catch (error) {
         console.error('Failed to load calendar events:', error);
       }
@@ -391,7 +393,7 @@ export default function MarketPage() {
                   Today's Events
                 </h2>
 
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
                   {/* Earnings */}
                   {earnings.length > 0 && (
                     <div>
