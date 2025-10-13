@@ -551,6 +551,7 @@ export default function MarketPage() {
                 </div>
               </div>
             </div>
+            </div>
           </div>
 
           {/* Sidebar - Watchlist */}
