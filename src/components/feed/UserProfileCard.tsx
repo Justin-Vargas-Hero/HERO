@@ -121,9 +121,6 @@ export function UserProfileCard({
               <div>
                 <p className="text-xs text-gray-500">Members</p>
                 <p className="font-semibold text-lg text-purple-600">{user.members.toLocaleString()}</p>
-                {user.membershipPrice && (
-                  <p className="text-xs text-gray-500 mt-0.5">${user.membershipPrice}/mo</p>
-                )}
               </div>
               <Crown className="w-4 h-4 text-purple-400" />
             </div>

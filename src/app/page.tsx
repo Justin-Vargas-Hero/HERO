@@ -5,9 +5,27 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Plus, TrendingUp, Filter, Search, ImageIcon, LinkIcon, FileText } from 'lucide-react';
-import { Post, PostType } from '@/components/feed/Post';
+import { Post, PostType, SentimentType } from '@/components/feed/Post';
 import { UserProfileCard } from '@/components/feed/UserProfileCard';
 import { ALL_SYMBOLS } from '@/data/symbol-database';
+
+// Sample chart data
+const SAMPLE_CHART_DATA = [
+  { time: '09:30', price: 195.5 },
+  { time: '10:00', price: 196.2 },
+  { time: '10:30', price: 195.8 },
+  { time: '11:00', price: 197.1 },
+  { time: '11:30', price: 197.5 },
+  { time: '12:00', price: 198.3 },
+  { time: '12:30', price: 197.9 },
+  { time: '13:00', price: 198.7 },
+  { time: '13:30', price: 199.2 },
+  { time: '14:00', price: 199.8 },
+  { time: '14:30', price: 200.1 },
+  { time: '15:00', price: 200.5 },
+  { time: '15:30', price: 201.2 },
+  { time: '16:00', price: 201.5 },
+];
 
 // Sample posts for demonstration
 const SAMPLE_POSTS = [
@@ -20,9 +38,11 @@ const SAMPLE_POSTS = [
     },
     community: 'AAPL',
     type: 'chart' as PostType,
+    sentiment: 'bullish' as SentimentType,
     title: 'Apple breaking out of consolidation pattern! 🚀',
     content: 'Been watching this setup for weeks. Clear breakout above $195 resistance with strong volume. Target is $210 based on the pattern height. Stop loss at $192.',
     chartSymbol: 'AAPL',
+    chartData: SAMPLE_CHART_DATA,
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
     likes: 45,
     comments: 12,
@@ -37,6 +57,7 @@ const SAMPLE_POSTS = [
     },
     community: 'NVDA',
     type: 'text' as PostType,
+    sentiment: 'bullish' as SentimentType,
     title: 'NVIDIA earnings play strategy',
     content: 'With earnings coming up next week, IV is through the roof. Selling covered calls here makes a lot of sense. The premium on the $900 strikes expiring Friday is juicy. Even if we get called away, that\'s a solid 5% gain in a week. Risk management is key - only playing with 25% of my NVDA position.',
     timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
@@ -53,13 +74,14 @@ const SAMPLE_POSTS = [
     },
     community: 'General',
     type: 'link' as PostType,
+    sentiment: 'bullish' as SentimentType,
     title: 'Fed Minutes Released - Dovish Tone Continues',
     content: 'The latest Fed minutes suggest rate cuts might come sooner than expected. This could be huge for growth stocks.',
     linkUrl: 'https://www.federalreserve.gov/monetarypolicy/fomcminutes.htm',
     linkPreview: {
       title: 'FOMC Minutes: December 2024 Meeting',
       description: 'Minutes of the Federal Open Market Committee meeting held on December 17-18, 2024',
-      image: 'https://www.federalreserve.gov/images/frs-seal.png',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Seal_of_the_United_States_Federal_Reserve_System.svg/240px-Seal_of_the_United_States_Federal_Reserve_System.svg.png',
       domain: 'federalreserve.gov'
     },
     timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000),
@@ -76,9 +98,10 @@ const SAMPLE_POSTS = [
     },
     community: 'SPY',
     type: 'image' as PostType,
+    sentiment: 'neutral' as SentimentType,
     title: 'SPY Iron Condor Setup - 45 DTE',
     content: 'Setting up an iron condor on SPY with 45 days to expiration. Selling the 440/445 put spread and 475/480 call spread. Collecting $180 in premium with max loss of $320. Probability of profit is 68%. Will manage at 21 DTE or 50% profit, whichever comes first.',
-    imageUrl: 'https://www.optionsprofitcalculator.com/img/og-image.png',
+    imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80',
     timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
     likes: 234,
     comments: 89,
@@ -93,6 +116,7 @@ const SAMPLE_POSTS = [
     },
     community: 'JNJ',
     type: 'text' as PostType,
+    sentiment: 'bullish' as SentimentType,
     title: 'Why JNJ is a dividend aristocrat worth holding forever',
     content: 'Johnson & Johnson has increased its dividend for 61 consecutive years! Current yield is 3.1% and payout ratio is only 45%, leaving plenty of room for future increases. The company\'s diverse healthcare portfolio provides incredible stability. This is a core holding in my retirement portfolio - I\'m never selling, just collecting those sweet quarterly payments and reinvesting. Dollar cost averaging $500 monthly.',
     timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
@@ -109,12 +133,31 @@ const SAMPLE_POSTS = [
     },
     community: 'COIN',
     type: 'chart' as PostType,
+    sentiment: 'bullish' as SentimentType,
     title: 'COIN following BTC perfectly - Next leg up incoming',
     content: 'The correlation between COIN and Bitcoin price action is undeniable. With BTC breaking above 45k, COIN should test $180 resistance soon. Volume profile shows strong support at $165.',
     chartSymbol: 'COIN',
+    chartData: SAMPLE_CHART_DATA.map(d => ({ ...d, price: d.price - 30 + Math.random() * 5 })), // Different chart data
     timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
     likes: 92,
     comments: 41,
+    isLiked: false
+  },
+  {
+    id: '7',
+    author: {
+      username: 'beartrader',
+      name: 'Marcus Lee',
+      profilePicture: 'https://api.dicebear.com/7.x/avataaars/svg?seed=marcus'
+    },
+    community: 'TSLA',
+    type: 'text' as PostType,
+    sentiment: 'bearish' as SentimentType,
+    title: 'TSLA overvalued at these levels - Taking profits',
+    content: 'PE ratio is through the roof, competition is heating up, and margins are compressing. I\'ve been long since $180 but selling my entire position here at $265. The risk/reward just isn\'t there anymore. Will look to re-enter if we see $220 again. Chinese EV makers are eating their lunch in international markets.',
+    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
+    likes: 156,
+    comments: 89,
     isLiked: false
   }
 ];

@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 import TradingViewChart from '@/components/market/TradingViewChart';
 
 export type PostType = 'text' | 'image' | 'chart' | 'link';
+export type SentimentType = 'bullish' | 'bearish' | 'neutral';
 
 interface PostProps {
   id: string;
@@ -20,6 +21,7 @@ interface PostProps {
   type: PostType;
   title: string;
   content: string;
+  sentiment?: SentimentType;
   imageUrl?: string;
   linkUrl?: string;
   linkPreview?: {
@@ -43,6 +45,7 @@ export function Post({
   type,
   title,
   content,
+  sentiment,
   imageUrl,
   linkUrl,
   linkPreview,
@@ -77,15 +80,13 @@ export function Post({
     return 'bg-blue-50 text-blue-700';
   };
 
-  // Get post type icon
-  const getPostTypeIcon = () => {
-    switch (type) {
-      case 'chart':
-        return <TrendingUp className="w-3 h-3" />;
-      case 'image':
-        return <ImageIcon className="w-3 h-3" />;
-      case 'link':
-        return <LinkIcon className="w-3 h-3" />;
+  // Get sentiment badge style
+  const getSentimentStyle = () => {
+    switch (sentiment) {
+      case 'bullish':
+        return 'bg-green-50 text-green-600 border-green-200';
+      case 'bearish':
+        return 'bg-red-50 text-red-600 border-red-200';
       default:
         return null;
     }
@@ -107,26 +108,59 @@ export function Post({
       case 'chart':
         return chartSymbol ? (
           <div className="mt-3 rounded-lg overflow-hidden border border-gray-200 bg-white p-4">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-3">
               <Link
                 href={`/symbol/${chartSymbol}`}
                 className="font-semibold text-lg hover:text-blue-600 transition-colors"
               >
-                {chartSymbol}
+                ${chartSymbol}
               </Link>
-              <span className="text-xs text-gray-500">View Full Chart →</span>
+              <Link
+                href={`/symbol/${chartSymbol}`}
+                className="text-xs text-blue-600 hover:underline"
+              >
+                View Full Chart →
+              </Link>
             </div>
             {chartData && chartData.length > 0 ? (
-              <div style={{ height: 300 }}>
-                <TradingViewChart
-                  symbol={chartSymbol}
-                  type="area"
-                  height={300}
-                  data={chartData}
-                />
+              <div className="h-[250px] bg-gray-50 rounded-lg p-4">
+                {/* Simple line chart visualization */}
+                <svg viewBox="0 0 400 200" className="w-full h-full">
+                  <polyline
+                    fill="none"
+                    stroke="#3b82f6"
+                    strokeWidth="2"
+                    points={chartData.map((d, i) => {
+                      const x = (i / (chartData.length - 1)) * 400;
+                      const minPrice = Math.min(...chartData.map(p => p.price));
+                      const maxPrice = Math.max(...chartData.map(p => p.price));
+                      const y = 200 - ((d.price - minPrice) / (maxPrice - minPrice)) * 180;
+                      return `${x},${y}`;
+                    }).join(' ')}
+                  />
+                  {/* Add area fill */}
+                  <polyline
+                    fill="rgba(59, 130, 246, 0.1)"
+                    stroke="none"
+                    points={`0,200 ${chartData.map((d, i) => {
+                      const x = (i / (chartData.length - 1)) * 400;
+                      const minPrice = Math.min(...chartData.map(p => p.price));
+                      const maxPrice = Math.max(...chartData.map(p => p.price));
+                      const y = 200 - ((d.price - minPrice) / (maxPrice - minPrice)) * 180;
+                      return `${x},${y}`;
+                    }).join(' ')} 400,200`}
+                  />
+                </svg>
+                <div className="flex justify-between mt-2 text-xs text-gray-500">
+                  <span>${chartData[0].price.toFixed(2)}</span>
+                  <span className="text-green-600 font-medium">
+                    +{((chartData[chartData.length - 1].price - chartData[0].price) / chartData[0].price * 100).toFixed(2)}%
+                  </span>
+                  <span>${chartData[chartData.length - 1].price.toFixed(2)}</span>
+                </div>
               </div>
             ) : (
-              <div className="h-[300px] bg-gray-50 rounded flex items-center justify-center">
+              <div className="h-[250px] bg-gray-50 rounded flex items-center justify-center">
                 <p className="text-gray-500">Chart loading...</p>
               </div>
             )}
@@ -214,11 +248,15 @@ export function Post({
               <div className="flex items-center gap-2 mt-1">
                 <Link
                   href={community === 'General' ? '/community/general' : `/symbol/${community}`}
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getCommunityStyle()}`}
+                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getCommunityStyle()}`}
                 >
-                  {getPostTypeIcon()}
                   {community === 'General' ? 'General' : `$${community}`}
                 </Link>
+                {sentiment && sentiment !== 'neutral' && (
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getSentimentStyle()}`}>
+                    {sentiment === 'bullish' ? '🟢 Bullish' : '🔴 Bearish'}
+                  </span>
+                )}
               </div>
             </div>
           </div>
