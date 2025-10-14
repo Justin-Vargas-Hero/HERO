@@ -38,6 +38,10 @@ interface PostProps {
   chartData?: any[]; // For embedded chart data
 }
 
+interface ExtendedPostProps extends PostProps {
+  onClick?: () => void;
+}
+
 export function Post({
   id,
   author,
@@ -54,8 +58,9 @@ export function Post({
   likes,
   comments,
   isLiked = false,
-  chartData
-}: PostProps) {
+  chartData,
+  onClick
+}: ExtendedPostProps) {
   const [liked, setLiked] = useState(isLiked);
   const [likesCount, setLikesCount] = useState(likes);
   const [showReportMenu, setShowReportMenu] = useState(false);
@@ -177,8 +182,25 @@ export function Post({
     }
   };
 
+  const handlePostClick = (e: React.MouseEvent) => {
+    // Don't trigger if clicking on interactive elements
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === 'BUTTON' ||
+      target.tagName === 'A' ||
+      target.closest('button') ||
+      target.closest('a')
+    ) {
+      return;
+    }
+    onClick?.();
+  };
+
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+    <div
+      className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      onClick={handlePostClick}
+    >
       <div className="p-4">
         {/* Header */}
         <div className="flex items-start justify-between mb-3">

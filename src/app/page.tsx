@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Plus, TrendingUp, Filter, Search, ImageIcon, LinkIcon, FileText } from 'lucide-react';
 import { Post, PostType, SentimentType } from '@/components/feed/Post';
 import { UserProfileCard } from '@/components/feed/UserProfileCard';
+import { PostModal } from '@/components/feed/PostModal';
 import { ALL_SYMBOLS } from '@/data/symbol-database';
 
 // Sample candlestick chart data with OHLC for lightweight-charts
@@ -232,6 +233,8 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [posts, setPosts] = useState(SAMPLE_POSTS);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [showPostModal, setShowPostModal] = useState(false);
 
   // Filter posts based on selected filter
   const filteredPosts = posts.filter(post => {
@@ -378,7 +381,14 @@ export default function HomePage() {
             <div className="space-y-4">
               {filteredPosts.length > 0 ? (
                 filteredPosts.map(post => (
-                  <Post key={post.id} {...post} />
+                  <Post
+                    key={post.id}
+                    {...post}
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setShowPostModal(true);
+                    }}
+                  />
                 ))
               ) : (
                 <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
@@ -419,6 +429,18 @@ export default function HomePage() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Post Detail Modal */}
+      {selectedPost && (
+        <PostModal
+          isOpen={showPostModal}
+          onClose={() => {
+            setShowPostModal(false);
+            setSelectedPost(null);
+          }}
+          post={selectedPost}
+        />
       )}
     </div>
   );
