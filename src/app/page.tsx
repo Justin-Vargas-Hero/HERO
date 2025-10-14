@@ -128,7 +128,8 @@ const SAMPLE_USER = {
   bio: 'Long-term investor focused on tech and healthcare. Always learning, always growing.',
   followers: 1247,
   following: 389,
-  memberSince: new Date('2024-01-15'),
+  members: 82,  // Paid subscribers
+  membershipPrice: 29.99,  // Monthly subscription price
   realizedProfit: 15420.50
 };
 

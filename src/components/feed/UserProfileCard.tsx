@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { TrendingUp, Users, UserPlus, DollarSign, ChevronDown, Star, Clock } from 'lucide-react';
+import { TrendingUp, Users, UserPlus, DollarSign, ChevronDown, Star, Clock, Crown } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
 interface RecentPost {
@@ -27,7 +27,8 @@ interface UserProfileCardProps {
     bio?: string;
     followers: number;
     following: number;
-    memberSince: Date;
+    members: number; // Paid subscribers
+    membershipPrice?: number; // Monthly subscription price
     realizedProfit: number;
   };
   recentPosts: RecentPost[];
@@ -115,15 +116,16 @@ export function UserProfileCard({
             </div>
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-3">
+          <div className="bg-purple-50 rounded-lg p-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-500">Member Since</p>
-                <p className="font-semibold text-sm">
-                  {user.memberSince.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                </p>
+                <p className="text-xs text-gray-500">Members</p>
+                <p className="font-semibold text-lg text-purple-600">{user.members.toLocaleString()}</p>
+                {user.membershipPrice && (
+                  <p className="text-xs text-gray-500 mt-0.5">${user.membershipPrice}/mo</p>
+                )}
               </div>
-              <Clock className="w-4 h-4 text-gray-400" />
+              <Crown className="w-4 h-4 text-purple-400" />
             </div>
           </div>
 
