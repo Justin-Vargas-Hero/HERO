@@ -189,7 +189,7 @@ export function PostModal({ isOpen, onClose, post, comments = SAMPLE_COMMENTS }:
                 View Full Chart →
               </Link>
             </div>
-            <div className="rounded-lg overflow-hidden">
+            <div className="rounded-lg overflow-hidden" style={{ contain: 'layout' }}>
               <TradingViewChart
                 symbol={post.chartSymbol}
                 type="candle"
@@ -244,7 +244,7 @@ export function PostModal({ isOpen, onClose, post, comments = SAMPLE_COMMENTS }:
       className="fixed inset-0 z-50 bg-white bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={handleBackdropClick}
     >
-      <div className="w-full max-w-7xl bg-white rounded-xl shadow-2xl overflow-hidden transform-gpu backface-hidden" style={{ aspectRatio: '16/9', willChange: 'transform', contain: 'layout' }}>
+      <div className="w-full max-w-7xl bg-white rounded-xl shadow-2xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
         <div className="h-full flex flex-col">
           {/* Header */}
           <div className="bg-white border-b border-gray-200 flex-shrink-0">
@@ -260,7 +260,7 @@ export function PostModal({ isOpen, onClose, post, comments = SAMPLE_COMMENTS }:
           </div>
 
           {/* Scrollable Content Area */}
-          <div className="flex-1 overflow-y-auto scroll-smooth" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="flex-1 overflow-y-auto">
             {/* Post Content */}
             <div className="p-6 border-b border-gray-200">
           {/* Author Info */}
