@@ -193,7 +193,7 @@ export function PostModal({ isOpen, onClose, post, comments = SAMPLE_COMMENTS }:
               <TradingViewChart
                 symbol={post.chartSymbol}
                 type="candle"
-                height={400}
+                height={300}
                 data={post.chartData || []}
                 interval="5min"
               />
@@ -233,24 +233,36 @@ export function PostModal({ isOpen, onClose, post, comments = SAMPLE_COMMENTS }:
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-start justify-center overflow-y-auto">
-      <div className="w-full max-w-4xl bg-white min-h-screen">
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 z-10">
-          <div className="flex items-center justify-between p-4">
-            <h2 className="text-lg font-semibold">Post</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
 
-        {/* Post Content */}
-        <div className="p-6 border-b border-gray-200">
+  return (
+    <div
+      className="fixed inset-0 z-50 backdrop-blur-sm bg-black bg-opacity-50 flex items-center justify-center p-4"
+      onClick={handleBackdropClick}
+    >
+      <div className="w-full max-w-7xl bg-white rounded-xl shadow-2xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
+        <div className="h-full flex flex-col">
+          {/* Header */}
+          <div className="bg-white border-b border-gray-200 flex-shrink-0">
+            <div className="flex items-center justify-between p-4">
+              <h2 className="text-lg font-semibold">Post</h2>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Post Content */}
+            <div className="p-6 border-b border-gray-200">
           {/* Author Info */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
@@ -365,10 +377,9 @@ export function PostModal({ isOpen, onClose, post, comments = SAMPLE_COMMENTS }:
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Comment Input */}
-        <div className="p-4 border-b border-gray-200">
+            {/* Comment Input */}
+            <div className="p-4 border-b border-gray-200">
           <div className="flex gap-3">
             <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
               <span className="text-gray-600 font-medium">U</span>
@@ -393,15 +404,16 @@ export function PostModal({ isOpen, onClose, post, comments = SAMPLE_COMMENTS }:
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Comments Section */}
-        <div className="p-4">
-          <h3 className="font-semibold mb-4">Comments ({comments.length})</h3>
-          <div className="space-y-2">
-            {comments.map((comment) => (
-              <Comment key={comment.id} comment={comment} />
-            ))}
+            {/* Comments Section */}
+            <div className="p-4">
+              <h3 className="font-semibold mb-4">Comments ({comments.length})</h3>
+              <div className="space-y-2">
+                {comments.map((comment) => (
+                  <Comment key={comment.id} comment={comment} />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
