@@ -241,10 +241,10 @@ export function PostModal({ isOpen, onClose, post, comments = SAMPLE_COMMENTS }:
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-white bg-opacity-95 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-white bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={handleBackdropClick}
     >
-      <div className="w-full max-w-7xl bg-white rounded-xl shadow-2xl overflow-hidden transform-gpu" style={{ aspectRatio: '16/9', willChange: 'transform' }}>
+      <div className="w-full max-w-7xl bg-white rounded-xl shadow-2xl overflow-hidden transform-gpu backface-hidden" style={{ aspectRatio: '16/9', willChange: 'transform', contain: 'layout' }}>
         <div className="h-full flex flex-col">
           {/* Header */}
           <div className="bg-white border-b border-gray-200 flex-shrink-0">
