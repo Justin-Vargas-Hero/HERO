@@ -9,15 +9,28 @@ import { Post, PostType, SentimentType } from '@/components/feed/Post';
 import { UserProfileCard } from '@/components/feed/UserProfileCard';
 import { ALL_SYMBOLS } from '@/data/symbol-database';
 
-// Sample chart data with timestamps for lightweight-charts
+// Sample candlestick chart data with OHLC for lightweight-charts
 const generateChartData = (basePrice: number = 195) => {
   const now = Math.floor(Date.now() / 1000);
   const data = [];
+  let lastClose = basePrice;
+
   for (let i = 14; i >= 0; i--) {
+    const open = lastClose;
+    const change = (Math.random() - 0.5) * 4; // Random change between -2 and +2
+    const close = open + change;
+    const high = Math.max(open, close) + Math.random() * 2;
+    const low = Math.min(open, close) - Math.random() * 2;
+
     data.push({
       time: now - (i * 300), // 5 minute intervals
-      value: basePrice + Math.random() * 10 - 2 + (14 - i) * 0.3
+      open: open,
+      high: high,
+      low: low,
+      close: close
     });
+
+    lastClose = close;
   }
   return data;
 };

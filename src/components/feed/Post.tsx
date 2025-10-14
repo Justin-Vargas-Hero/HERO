@@ -127,7 +127,7 @@ export function Post({
             <div className="rounded-lg overflow-hidden">
               <TradingViewChart
                 symbol={chartSymbol}
-                type="area"
+                type="candle"
                 height={250}
                 data={chartData || []}
                 interval="5min"
