@@ -376,33 +376,35 @@ export function PostModal({ isOpen, onClose, post, comments = SAMPLE_COMMENTS }:
               </button>
             </div>
           </div>
+            </div>
 
             {/* Comment Input */}
             <div className="p-4 border-b border-gray-200">
-          <div className="flex gap-3">
-            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-              <span className="text-gray-600 font-medium">U</span>
-            </div>
-            <div className="flex-1">
-              <textarea
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Write a comment..."
-                className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:border-blue-500"
-                rows={3}
-              />
-              <div className="flex justify-end mt-2">
-                <button
-                  onClick={handleComment}
-                  disabled={!commentText.trim()}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Send className="w-4 h-4" />
-                  Comment
-                </button>
+              <div className="flex gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                  <span className="text-gray-600 font-medium">U</span>
+                </div>
+                <div className="flex-1">
+                  <textarea
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Write a comment..."
+                    className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:border-blue-500"
+                    rows={3}
+                  />
+                  <div className="flex justify-end mt-2">
+                    <button
+                      onClick={handleComment}
+                      disabled={!commentText.trim()}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Send className="w-4 h-4" />
+                      Comment
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
             {/* Comments Section */}
             <div className="p-4">
