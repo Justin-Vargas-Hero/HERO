@@ -249,7 +249,7 @@ export function PostModal({ isOpen, onClose, post, comments = SAMPLE_COMMENTS }:
           {/* Header */}
           <div className="bg-white border-b border-gray-200 flex-shrink-0">
             <div className="flex items-center justify-between p-4">
-              <h2 className="text-lg font-semibold">Post</h2>
+              <h2 className="text-lg font-semibold truncate flex-1 mr-4">{post.title}</h2>
               <button
                 onClick={onClose}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -344,8 +344,7 @@ export function PostModal({ isOpen, onClose, post, comments = SAMPLE_COMMENTS }:
             </span>
           </div>
 
-          {/* Title and Content */}
-          <h1 className="text-2xl font-bold mb-3">{post.title}</h1>
+          {/* Post Content */}
           <p className="text-base text-gray-800 whitespace-pre-wrap">{post.content}</p>
 
           {/* Media Content */}
