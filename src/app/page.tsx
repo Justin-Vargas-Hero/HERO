@@ -9,23 +9,20 @@ import { Post, PostType, SentimentType } from '@/components/feed/Post';
 import { UserProfileCard } from '@/components/feed/UserProfileCard';
 import { ALL_SYMBOLS } from '@/data/symbol-database';
 
-// Sample chart data
-const SAMPLE_CHART_DATA = [
-  { time: '09:30', price: 195.5 },
-  { time: '10:00', price: 196.2 },
-  { time: '10:30', price: 195.8 },
-  { time: '11:00', price: 197.1 },
-  { time: '11:30', price: 197.5 },
-  { time: '12:00', price: 198.3 },
-  { time: '12:30', price: 197.9 },
-  { time: '13:00', price: 198.7 },
-  { time: '13:30', price: 199.2 },
-  { time: '14:00', price: 199.8 },
-  { time: '14:30', price: 200.1 },
-  { time: '15:00', price: 200.5 },
-  { time: '15:30', price: 201.2 },
-  { time: '16:00', price: 201.5 },
-];
+// Sample chart data with timestamps for lightweight-charts
+const generateChartData = (basePrice: number = 195) => {
+  const now = Math.floor(Date.now() / 1000);
+  const data = [];
+  for (let i = 14; i >= 0; i--) {
+    data.push({
+      time: now - (i * 300), // 5 minute intervals
+      value: basePrice + Math.random() * 10 - 2 + (14 - i) * 0.3
+    });
+  }
+  return data;
+};
+
+const SAMPLE_CHART_DATA = generateChartData(195);
 
 // Sample posts for demonstration
 const SAMPLE_POSTS = [
@@ -137,7 +134,7 @@ const SAMPLE_POSTS = [
     title: 'COIN following BTC perfectly - Next leg up incoming',
     content: 'The correlation between COIN and Bitcoin price action is undeniable. With BTC breaking above 45k, COIN should test $180 resistance soon. Volume profile shows strong support at $165.',
     chartSymbol: 'COIN',
-    chartData: SAMPLE_CHART_DATA.map(d => ({ ...d, price: d.price - 30 + Math.random() * 5 })), // Different chart data
+    chartData: generateChartData(165), // Different chart data for COIN
     timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
     likes: 92,
     comments: 41,

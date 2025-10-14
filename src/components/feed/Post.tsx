@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart, MessageCircle, Share2, Flag, TrendingUp, Link as LinkIcon, ImageIcon, MoreHorizontal } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Flag, MoreHorizontal } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import TradingViewChart from '@/components/market/TradingViewChart';
 
@@ -96,12 +96,14 @@ export function Post({
     switch (type) {
       case 'image':
         return imageUrl ? (
-          <div className="mt-3 rounded-lg overflow-hidden bg-gray-100">
-            <img
-              src={imageUrl}
-              alt={title}
-              className="w-full h-auto max-h-[500px] object-contain"
-            />
+          <div className="mt-3">
+            <div className="relative w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-100" style={{ paddingBottom: '56.25%' /* 16:9 aspect ratio */ }}>
+              <img
+                src={imageUrl}
+                alt={title}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </div>
           </div>
         ) : null;
 
@@ -122,48 +124,15 @@ export function Post({
                 View Full Chart →
               </Link>
             </div>
-            {chartData && chartData.length > 0 ? (
-              <div className="h-[250px] bg-gray-50 rounded-lg p-4">
-                {/* Simple line chart visualization */}
-                <svg viewBox="0 0 400 200" className="w-full h-full">
-                  <polyline
-                    fill="none"
-                    stroke="#3b82f6"
-                    strokeWidth="2"
-                    points={chartData.map((d, i) => {
-                      const x = (i / (chartData.length - 1)) * 400;
-                      const minPrice = Math.min(...chartData.map(p => p.price));
-                      const maxPrice = Math.max(...chartData.map(p => p.price));
-                      const y = 200 - ((d.price - minPrice) / (maxPrice - minPrice)) * 180;
-                      return `${x},${y}`;
-                    }).join(' ')}
-                  />
-                  {/* Add area fill */}
-                  <polyline
-                    fill="rgba(59, 130, 246, 0.1)"
-                    stroke="none"
-                    points={`0,200 ${chartData.map((d, i) => {
-                      const x = (i / (chartData.length - 1)) * 400;
-                      const minPrice = Math.min(...chartData.map(p => p.price));
-                      const maxPrice = Math.max(...chartData.map(p => p.price));
-                      const y = 200 - ((d.price - minPrice) / (maxPrice - minPrice)) * 180;
-                      return `${x},${y}`;
-                    }).join(' ')} 400,200`}
-                  />
-                </svg>
-                <div className="flex justify-between mt-2 text-xs text-gray-500">
-                  <span>${chartData[0].price.toFixed(2)}</span>
-                  <span className="text-green-600 font-medium">
-                    +{((chartData[chartData.length - 1].price - chartData[0].price) / chartData[0].price * 100).toFixed(2)}%
-                  </span>
-                  <span>${chartData[chartData.length - 1].price.toFixed(2)}</span>
-                </div>
-              </div>
-            ) : (
-              <div className="h-[250px] bg-gray-50 rounded flex items-center justify-center">
-                <p className="text-gray-500">Chart loading...</p>
-              </div>
-            )}
+            <div className="rounded-lg overflow-hidden">
+              <TradingViewChart
+                symbol={chartSymbol}
+                type="area"
+                height={250}
+                data={chartData || []}
+                interval="5min"
+              />
+            </div>
           </div>
         ) : null;
 
